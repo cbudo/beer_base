@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}    <!-- Custom styles for this template -->
+<link href="../static/custom_css/search_body.css" rel="stylesheet">
+<div class="container">
+    <div class="row">
+        <div class="form-group">
+            <label for="beerSearchInput">Search Beers</label>
+            <input type="text" class="form-control" id="beerSearchInput" aria-describedby="searchHelp"
+                   placeholder="Search the beers..."/>
+            <small id="searchHelp" class="form-text text-muted">
+                Please enter keywords associated with the beer you wish to search!
+            </small>
+            <button class="btn btn-primary" onclick="search_by_keywords()">Submit</button>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-12">
+            <table class="table" id="searchTable">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Style</th>
+                    <th>ABV (%)</th>
+                    <th>IBU</th>
+                    <th>Brewery Responsible</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <hr>
+        </div>
+    </div>
+</div>
+{% endblock %}

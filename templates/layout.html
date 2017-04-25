@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="robots" content="noarchive">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="google-site-verification" content="nNKaetxsRF2a8AmSudbTvmhVDPWQfFOvRRX0pPAAn28">
+        <link rel="icon" href="../static/custom_images/beer_logo.png">
+        <link href="../static/custom_css/layout.css" rel="stylesheet">
+        <title>BeerBase</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <img class="rounded-circle" src="../static/custom_images/beer_logo.png" height="50" width="50">
+            </a>
+
+            <div class="collapse navbar-collapse" id="main-navbar">
+                <ul class="navbar-nav nav-pills nav-fill mr-auto mt-2 mt-md-0" id="main-navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link rounded btn" href="/search">Search</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="content-window">
+            {% block body %}
+            {% endblock %}
+        </div>
+        <footer class="footer">
+            <p>&copy; BeerBase 2017 | No Privacy | No Terms and Conditions </p>
+        </footer>
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="../static/dist/js/jquery.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+        <script src="../static/dist/js/bootstrap.js"></script>
+        <script src="../static/custom_js/search_body.js"></script>
+        <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+    </body>
+</html>

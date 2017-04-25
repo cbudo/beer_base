@@ -1,1 +1,2 @@
+pysolr
 flask==0.11.1
