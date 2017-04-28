@@ -13,15 +13,16 @@ session = cluster.connect('brewbase')
 def index():
     return render_template("landing_body.html")
 	
-@app.route("/beer")
-def beer():
-	rows = session.execute('SELECT * FROM beer WHERE beer_id = 1 LIMIT 1')
+@app.route("/beer/<int:beer_id>")
+def beer(beer_id):
+	rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
 	beer_info = rows[0]
 	return render_template("beer.html", beer = beer_info)
 
-@app.route("/brewery")
-def brewery():
-	brewery_info = {'name':'Guinness', 'city':'Dublin', 'state': 'Ireland'}
+@app.route("/brewery/<int:brewery_id")
+def brewery(brewery_id):
+	rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
+	brewery_info = rows[0]
 	return render_template("brewery.html", brewery = brewery_info)
 
 @app.route("/search")
