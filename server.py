@@ -15,7 +15,7 @@ def index():
 	
 @app.route("/beer")
 def beer():
-	rows = session.execute('SELECT * FROM beer WHERE "beer_id" = 1 LIMIT 1')
+	rows = session.execute('SELECT * FROM beer WHERE beer_id = 1 LIMIT 1')
 	beer_info = rows[0]
 	return render_template("beer.html", beer = beer_info)
 
