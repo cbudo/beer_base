@@ -1,14 +1,28 @@
 from flask import Flask, render_template, jsonify, request
 import pysolr
 import re
+from config import cassandra_cluster
+from cassandra.cluster import Cluster
 
 app = Flask(__name__)
+cluster = Cluster(cassandra_cluster)
+session = cluster.connect('brewbase')
 
 
 @app.route("/")
 def index():
     return render_template("landing_body.html")
+	
+@app.route("/beer")
+def beer():
+	rows = session.execute('SELECT * FROM beer WHERE "beer_id" = 1 LIMIT 1')
+	beer_info = rows[0]
+	return render_template("beer.html", beer = beer_info)
 
+@app.route("/brewery")
+def brewery():
+	brewery_info = {'name':'Guinness', 'city':'Dublin', 'state': 'Ireland'}
+	return render_template("brewery.html", brewery = brewery_info)
 
 @app.route("/search")
 def search():
