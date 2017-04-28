@@ -1,13 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
-<table border = 1>
-    {% for key, value in beer.iteritems() %}
-         
-    <tr>
-        <th> {{ key }} </th>
-        <td> {{ value }} </td>
-    </tr>
-            
-    {% endfor %}
-</table>
+
+<div class="col-lg-4">
+    <img src="../static/img/1019086834_c540b74995_q.jpg"/>
+</div>
+<div class="col-lg-6">
+    <div class="col-lg-12">\
+        <h3 id="beer_name" name="beer_name">{{beer.beer_name}}</h3>
+        <h4 id="category_style">{{beer.category + beer.style}}</h4>
+    </div>
+</div>
+
 {% endblock %}
