@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="col-lg-12 col-md-12">
+    <div class="col-lg-6">
+        <h2 id="brewery_name" name="brewery_name">{{brewery.brewery_name}}</h2>
+        <h4 id="address1">{{brewery.address1}}</h4>
+        <h4 id="address2">ABV : {{brewery.address2}}</h4>
+        <h4 id="city_state">IBU : {{'{} {} {}'.format(brewery.city, brewery.state, brewery.code)}}</h4>
+        <h4 id="country">{{brewery.country}}</h4>
+    </div>
+    <div class="col-lg-6">
+        <h4 id="website">{{brewery.website}}</h4>
+        <h4 id="phone">{{brewery.phone}}</h4>
+    </div>
+</div>
+<div class="col-lg-12">
+    <p>{{brewery.description}}</p>
+</div>
+
+{% endblock %}
