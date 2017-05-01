@@ -18,13 +18,24 @@ def search():
 @app.route("/perform_search", methods=['POST'])
 def perform_search():
     solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=10)
+
     query = request.form['query']
+
     if query is None or query == '':
         return jsonify([], status=200)
-    cleaned_query = ''
+
     word_list = query.split(' ')
+    filter_string = request.form['filter']
+    in_filters = []
+    if filter_string != '':
+        in_filters = filter_string.split(' ')
+    entity = request.form['entity']
+
     if len(word_list) == 0:
         return jsonify([], status=200)
+
+    cleaned_query = ''
+    cleaned_words = []
     for word in word_list:
         if re.match(r"^[a-zA-Z0-9_]*$", word) is None:
             continue
@@ -32,6 +43,32 @@ def perform_search():
             cleaned_query = word
         else:
             cleaned_query += ' ' + word
-    filter_queries = ['abv:*']
-    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op='AND')
+        cleaned_words.append(word)
+
+    op = 'AND'
+
+    temp_query = ''
+    for x in range(0, len(in_filters)):
+        if re.match(r"^[a-zA-Z0-9_]*$", in_filters[x]) is None:
+            continue
+        to_add = ''
+        for cleaned_word in cleaned_words:
+            if to_add == '':
+                to_add = in_filters[x] + ':' + '(' + cleaned_word
+            else:
+                to_add += ' OR ' + cleaned_word
+        to_add += ') '
+        temp_query += to_add
+
+    print(temp_query)
+
+    if temp_query != '':
+        cleaned_query = temp_query
+
+    if entity == 'beer':
+        filter_queries = ['abv: *']
+    else:
+        filter_queries = ['city: *']
+
+    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
     return jsonify(results=results.docs, status_code=200)

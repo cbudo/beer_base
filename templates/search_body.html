@@ -10,7 +10,20 @@
             <small id="searchHelp" class="form-text text-muted">
                 Please enter keywords associated with the beer you wish to search!
             </small>
-            <button class="btn btn-primary" onclick="search_by_keywords()">Submit</button>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="filter-chooser">
+                <option selected value="">Choose Filter...</option>
+                <option value="name">Name</option>
+                <option value="city state country">Location</option>
+                <option value="keywords">Keywords</option>
+            </select>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="entity-chooser">
+                <option selected value="beer">Beer</option>
+                <option selected value="brewery">Brewery</option>
+            </select>
+            <button type="button" class="btn btn-primary"
+                    onclick="search_by_keywords()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Submit
+            </button>
         </div>
     </div>
     <br/>
