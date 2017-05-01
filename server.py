@@ -19,7 +19,7 @@ def beer(beer_id):
 	beer_info = rows[0]
 	return render_template("beer.html", beer = beer_info)
 
-@app.route("/brewery/<int:brewery_id")
+@app.route("/brewery/<int:brewery_id>")
 def brewery(brewery_id):
 	rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
 	brewery_info = rows[0]
