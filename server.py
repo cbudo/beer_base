@@ -20,19 +20,21 @@ def perform_search():
     solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=10)
 
     query = request.form['query']
-
     if query is None or query == '':
-        return jsonify([], status=200)
-
+        return jsonify(results=[], status_code=200)
     word_list = query.split(' ')
+
     filter_string = request.form['filter']
     in_filters = []
-    if filter_string != '':
+    if filter_string is not None and filter_string != '':
         in_filters = filter_string.split(' ')
-    entity = request.form['entity']
+
+    entity = 'beer'
+    if request.form['entity'] is not None and request.form['entity'] != '':
+        entity = request.form['entity']
 
     if len(word_list) == 0:
-        return jsonify([], status=200)
+        return jsonify(results=[], status_code=200)
 
     cleaned_query = ''
     cleaned_words = []
