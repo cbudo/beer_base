@@ -9,6 +9,7 @@ function beer_or_brewery(){
         $('#country_sel').hide();
         $('#beer-row').show();
         $('#brewery-row').hide();
+        $('#brewery-table tbody').html("")
     }
     else{
         $('#brewery_sel').hide();
@@ -19,6 +20,7 @@ function beer_or_brewery(){
         $('#country_sel').show();
         $('#beer-row').hide();
         $('#brewery-row').show();
+        $('#beer-table tbody').html("")
     }
 }
 
