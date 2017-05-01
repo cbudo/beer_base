@@ -12,18 +12,21 @@ session = cluster.connect('brewbase')
 @app.route("/")
 def index():
     return render_template("landing_body.html")
-	
+
+
 @app.route("/beer/<int:beer_id>")
 def beer(beer_id):
-	rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
-	beer_info = rows[0]
-	return render_template("beer.html", beer = beer_info)
+    rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
+    beer_info = rows[0]
+    return render_template("beer.html", beer=beer_info)
+
 
 @app.route("/brewery/<int:brewery_id>")
 def brewery(brewery_id):
-	rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
-	brewery_info = rows[0]
-	return render_template("brewery.html", brewery = brewery_info)
+    rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
+    brewery_info = rows[0]
+    return render_template("brewery.html", brewery=brewery_info)
+
 
 @app.route("/search")
 def search():
@@ -86,5 +89,5 @@ def perform_search():
         filter_queries = ['country:*']
 
     results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
-
+    print(results.docs)
     return jsonify(results=results.docs, status_code=200)
