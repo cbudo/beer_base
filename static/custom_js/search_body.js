@@ -1,3 +1,5 @@
+var table_contents = []
+
 function beer_or_brewery(){
     entity = $('#entity-chooser').val();
     if(entity === 'beer') {
@@ -50,6 +52,7 @@ function search_by_keywords(){
         url: server_endpoint,
         success: function (data) {
             if (data.status_code === 200) {
+                table_contents = data.results;
                 if (entity === 'beer'){
                     $('#beer-table tbody').html(
                         $.map(data.results, function (item, index) {

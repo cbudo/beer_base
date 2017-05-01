@@ -71,5 +71,5 @@ def perform_search():
         filter_queries = ['country:*']
 
     results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
-    print(results.docs)
+
     return jsonify(results=results.docs, status_code=200)
