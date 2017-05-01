@@ -1,3 +1,20 @@
+function beer_or_brewery(){
+    entity = $('#entity-chooser').val();
+    console.log(entity);
+    if(entity === 'beer') {
+        $('#brewery_sel').show();
+        $('#ibu_sel').show();
+        $('#abv_sel').show();
+        $('#location_sel').hide();
+    }
+    else{
+        $('#brewery_sel').hide();
+        $('#ibu_sel').hide();
+        $('#abv_sel').hide();
+        $('#location_sel').show();
+    }
+}
+
 function search_by_keywords(){
     var server_endpoint = '/perform_search';
 
@@ -15,7 +32,9 @@ function search_by_keywords(){
 
                 $('#searchTable tbody').html(
                     $.map(data.results, function (item, index) {
-                        return '<tr> <td>'+ return_full_string(item.name) + '</td> <td>' + return_full_string(item.category) + '</td> <td>' + return_full_string(item.style) + '</td> <td>' + item.abv[0] + '</td> <td>' + item.ibu[0] + '</td> <td>' + return_full_string(item.brewery) + '</td> </tr>';
+                        return '<tr> <td>'+ cat_name(item.name) + '</td> <td>' + cat_name(item.category) + '</td> <td>'
+                        + cat_name(item.style) + '</td> <td>' + item.abv[0] + '</td> <td>' + item.ibu[0] + '</td> <td>'
+                        + cat_name(item.brewery) + '</td> </tr>';
                     }).join());
 
             }
@@ -25,10 +44,10 @@ function search_by_keywords(){
     }});
 }
 
-function return_full_string(array_of_words){
+function cat_name(array_of_words){
     full_string = ""
     array_of_words.forEach(function(word){
-        if(full_string == ""){
+        if(full_string === ""){
             full_string += word;
         }
         else{
