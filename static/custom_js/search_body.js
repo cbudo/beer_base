@@ -53,7 +53,7 @@ function search_by_keywords(){
                 if (entity === 'beer'){
                     $('#beer-table tbody').html(
                         $.map(data.results, function (item, index) {
-                            return '<tr> <td> <a href="0.0.0.0:5000/beer/' + item.id[0] + '>' + cat_name(item.name) +
+                            return '<tr> <td> <a href="0.0.0.0:5000/beer/' + item.id[0] + '">' + cat_name(item.name) +
                             '</a> </td> <td>' + cat_name(item.category) + '</td> <td>' + cat_name(item.style) +
                             '</td> <td>' + item.abv[0] + '</td> <td>' + item.ibu[0] + '</td> <td>'
                             + cat_name(item.brewery) + '</td> </tr>';
@@ -62,9 +62,9 @@ function search_by_keywords(){
                 else {
                     $('#brewery-table tbody').html(
                         $.map(data.results, function (item, index) {
-                            return '<tr> <td> <a href="0.0.0.0:5000/beer/' + item.id[0] + '>' + cat_name(item.name) +
-                            '</td> <td>' + cat_name(item.city) + '</td> <td>' + cat_name(item.state) + '</td> <td>'
-                            + cat_name(item.country) + '</td> </tr>';
+                            return '<tr> <td> <a href="0.0.0.0:5000/brewery/' + item.id[0] + '">' + cat_name(item.name)
+                            + '</a> </td> <td>' + cat_name(item.city) + '</td> <td>' + cat_name(item.state) +
+                            '</td> <td>' + cat_name(item.country) + '</td> </tr>';
                         }).join());
                 }
             }
@@ -75,7 +75,7 @@ function search_by_keywords(){
 }
 
 function cat_name(array_of_words){
-    full_string = ""
+    full_string = "";
     array_of_words.forEach(function(word){
         if(full_string === ""){
             full_string += word;

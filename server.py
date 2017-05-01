@@ -47,7 +47,7 @@ def perform_search():
             cleaned_query += ' ' + word
         cleaned_words.append(word)
 
-    op = 'AND'
+    op = 'OR'
 
     temp_query = ''
     for x in range(0, len(in_filters)):
@@ -58,19 +58,18 @@ def perform_search():
             if to_add == '':
                 to_add = in_filters[x] + ':' + '(' + cleaned_word
             else:
-                to_add += ' OR ' + cleaned_word
+                to_add += ' AND ' + cleaned_word
         to_add += ') '
         temp_query += to_add
-
-    print(temp_query)
 
     if temp_query != '':
         cleaned_query = temp_query
 
     if entity == 'beer':
-        filter_queries = ['abv: *']
+        filter_queries = ['abv:*']
     else:
-        filter_queries = ['city: *']
+        filter_queries = ['country:*']
 
     results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
+    print(results.docs)
     return jsonify(results=results.docs, status_code=200)
