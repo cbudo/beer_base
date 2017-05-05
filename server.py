@@ -1,8 +1,8 @@
 from flask import Flask, render_template, jsonify, request
 import pysolr
-import re
 from config import cassandra_cluster
 from cassandra.cluster import Cluster
+import re
 
 app = Flask(__name__)
 cluster = Cluster(cassandra_cluster)
@@ -16,6 +16,49 @@ def index():
 
 @app.route("/beer/<int:beer_id>")
 def beer(beer_id):
+    rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
+    beer_info = rows[0]
+    return render_template("beer.html", beer=beer_info)
+
+
+@app.route("/add_beer", methods=["GET", "POST"])
+def add_beer():
+    if request.method == "GET":
+        return render_template("add_beer.html")
+    beer_info = request.form
+    beer_id = session.execute("SELECT next_id FROM ids where id_name = 'beer_id' LIMIT 1")[0].next_id
+    result = {'applied': False}
+    while not result['applied']:
+        print('candidate beer_id: {}'.format(beer_id))
+        cql_result = session.execute(
+            "UPDATE ids SET next_id = {} WHERE id_name = 'beer_id' IF next_id = {}".format(
+                beer_id + 1, beer_id))
+        result['applied'] = cql_result[0].applied
+        print(result['applied'])
+    print(beer_id)
+    try:
+        brewery_id = session.execute(
+            "SELECT * FROM brewery where brewery_name={} LIMIT 1 ALLOW FILTERING".format(beer_info['brewery']))[
+            0].brewery_id
+    except:
+        brewery_id = session.execute("SELECT next_id FROM ids where id_name = 'brewery_id' LIMIT 1")[0].next_id
+        result = {'applied': False}
+        while not result['applied']:
+            print('candidate brewery_id: {}'.format(brewery_id))
+            cql_result = session.execute(
+                "UPDATE ids SET next_id = {} WHERE id_name = 'brewery_id' IF next_id = {}".format(
+                    brewery_id + 1, brewery_id))
+            result['applied'] = cql_result[0].applied
+            print(result['applied'])
+        session.execute(
+            "INSERT INTO brewery (brewery_id, brewery_name) VALUES ({}, '".format(brewery_id) + str(
+                beer_info['brewery']) + "')")
+    style_id = -1
+    category_id = -1
+    session.execute(
+        "INSERT INTO beer (beer_id, abv, beer_name, brewery_id, category_id, description, ibu, srm, style_id) VALUES ({}, {}, \'{}\', {}, {}, \'{}\', {}, {}, {})".format(
+            beer_id, beer_info['abv'], beer_info['name'], brewery_id, category_id, beer_info['description'],
+            beer_info['ibu'], beer_info['srm'], style_id))
     rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
     beer_info = rows[0]
     return render_template("beer.html", beer=beer_info)
