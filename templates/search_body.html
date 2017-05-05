@@ -10,13 +10,31 @@
             <small id="searchHelp" class="form-text text-muted">
                 Please enter keywords associated with the beer you wish to search!
             </small>
-            <button class="btn btn-primary" onclick="search_by_keywords()">Submit</button>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="filter-chooser">
+                <option selected value="" id="choose_filter_sel">Choose Filter...</option>
+                <option value="name" id="name_sel">Name</option>
+                <option value="keywords" id="keywords_sel">Keywords</option>
+                <option value="brewery" id="brewery_sel">Brewery</option>
+                <option value="style" id="style_sel">Style</option>
+                <option value="category" id="category_sel">Category</option>
+                <option style="display:none" value="city" id="city_sel">City</option>
+                <option style="display:none" value="state" id="state_sel">State</option>
+                <option style="display:none" value="country" id="country_sel">Country</option>
+            </select>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="entity-chooser" onclick="beer_or_brewery()">
+                <option selected value="beer">Beer</option>
+                <option value="brewery">Brewery</option>
+            </select>
+            <button type="button" class="btn btn-primary"
+                    onclick="search_by_keywords()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Submit
+            </button>
         </div>
     </div>
     <br/>
-    <div class="row">
+    <div class="row" id="beer-row">
         <div class="col-lg-12">
-            <table class="table" id="searchTable">
+            <table class="table" id="beer-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -25,6 +43,23 @@
                     <th>ABV (%)</th>
                     <th>IBU</th>
                     <th>Brewery Responsible</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <hr>
+        </div>
+    </div>
+    <div class="row" id="brewery-row" style="display:none">
+        <div class="col-lg-12">
+            <table class="table" id="brewery-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Country</th>
                 </tr>
                 </thead>
                 <tbody>
