@@ -1,0 +1,16 @@
+LOAD CSV WITH HEADERS FROM "file:/breweries.csv" AS csvLine CREATE (p:Brewery { id: toInt(csvLine.id), location: csvLine.code })
+
+CREATE INDEX ON :Brewery(id);
+
+LOAD CSV WITH HEADERS FROM "file:/fixedbeers.csv" AS csvLine CREATE (p:Beer { id: toInt(csvLine.id), brewery_id: toInt(csvLine.brewery_id),  style_id: toInt(csvLine.style_id), abv: csvLine.abv, ibu: csvLine.ibu})
+
+CREATE INDEX ON :Beer(id);
+
+match (n) return (n)
+
+MATCH (br1:Brewery),(b1:Beer) WHERE br1.id = b1.brewery_id CREATE (br1)-[:PRODUCES]->(b1)
+
+call db.schema()
+
+
+/var/lib/neo4j/import

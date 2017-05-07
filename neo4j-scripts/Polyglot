@@ -1,0 +1,26 @@
+Cassandra Queries for Budo to work through polyglot:
+
+#CREATE THE TEST NODE:
+
+CREATE (b:Beer { id: -1, brewery_id: -1, style_id: 0, abv: 0, ibu: 0 })
+
+CREATE (br:Brewery { id: -1, location: -1 })
+
+CREATE (u:User {id: -1, name: TestUser, preferences: Nothing })
+
+
+#CREATE A NEW BEER:
+
+CREATE (b:Beer { id: (add id here), brewery_id: (add brewery id here), style_id: (add style_id here), abv: (add abv here), ibu: (add ibu here) })
+
+CREATE (br:Brewery { id: (add id here), location: (add location here) })
+
+CREATE (u:User {id: (add id here), name: (add name here), preferences: (add preferences here)})
+
+#Match Queries (for python - Just shove these in the method you are using to query neo4j from python.  I've done the necessary string foirmatting I think)
+
+("MATCH (b:Beer) WHERE b.id = \'%s\' return b" % Beer.id)
+
+("MATCH (br:Brewery) WHERE br.id=\'%s\' return br" % Brewery.id)
+
+("MATCH (u:User) WHERE u.id=\'%s'\ return u" % User.id)
