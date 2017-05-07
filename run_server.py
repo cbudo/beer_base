@@ -6,6 +6,7 @@ import time
 import config
 import threading
 
+
 class Updatr:
     def __init__(self, schedule_length):
         self.schedule_length = schedule_length
@@ -19,6 +20,7 @@ class Updatr:
             self.update_solr(NotImplemented)
         if self.neo4j_is_up():
             self.update_neo4j()
+        self.is_running = False
 
     def solr_is_up(self):
         try:
