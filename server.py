@@ -59,6 +59,10 @@ def add_beer():
             "INSERT INTO brewery_update (id, name) VALUES({},\'{}\')".format(brewery_id, beer_info['brewery']))
     style_id = -1
     category_id = -1
+    if not beer_info['srm']:
+        srm = -1
+    else:
+        srm = beer_info['srm']
     session.execute(
         "INSERT INTO beer_update(id, abv, brewery, brewery_id, category, category_id, ibu, in_neo4j, in_solr, name, style, style_id) VALUES({},{},\'{}\',{}, \'{}\', {},{},{},{},\'{}\',\'{}\',{})".format(
             beer_id, beer_info['abv'], beer_info['brewery'], brewery_id, beer_info['category'], category_id,
@@ -67,7 +71,7 @@ def add_beer():
     session.execute(
         "INSERT INTO beer (beer_id, abv, beer_name, brewery_id, category_id, description, ibu, srm, style_id) VALUES ({}, {}, \'{}\', {}, {}, \'{}\', {}, {}, {})".format(
             beer_id, beer_info['abv'], beer_info['name'], brewery_id, category_id, beer_info['description'],
-            beer_info['ibu'], beer_info['srm'], style_id))
+            beer_info['ibu'], srm, style_id))
     rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
     beer_info = rows[0]
     return render_template("beer.html", beer=beer_info)
