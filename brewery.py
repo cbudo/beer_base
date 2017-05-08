@@ -58,19 +58,22 @@ class Brewery:
 
     def submitBrewery2neo4j(self):
         tx = g.begin()
-        valid = selector.select("Brewery", self.id)
+        # valid = selector.select("Brewery", self.id)
+        valid = g.run('MATCH (br:Brewery { id: toInt(\'%s\')}) return br' % self.id)
         for v in valid:
-            if v['id'] == self.id:
+            # print (v[0]['id'])
+            # print self.id
+            if v[0]['id'] == self.id:
                 print('Brewery with this ID already exists')
                 return
 
         a = Node("Brewery", id=self.id, location=self.zip)
         tx.create(a)
         tx.commit()
-
-        insertedCorrectly = selector.select("Brewery", self.id)
-        for v in valid:
-            if v['id'] == self.id:
+        # insertedCorrectly = selector.select("Brewery", self.id)
+        insertedCorrectly = g.run('MATCH (br:Brewery { id: toInt(\'%s\')}) return br' % self.id)
+        for v in insertedCorrectly:
+            if v[0]['id'] == self.id:
                 return True
             else:
                 return False
