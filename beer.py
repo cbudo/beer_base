@@ -33,11 +33,13 @@ class Beer:
         solr.add([{
             'beer_id': self.id,
             'brew_id': self.brewery_id,
+            'brewery': self.brewery.split(' '),
             'style': self.style.split(' '),
             'category': self.category.split(' '),
             'abv': self.abv,
             'ibu': self.ibu,
-            'name': self.name.split(' ')
+            'name': self.name.split(' '),
+            'keywords': []
         }])
         results = solr.search(q='beer_id:' + str(self.id), fq=[], rows=1)
         if len(results.docs) >= 1:
