@@ -64,7 +64,7 @@ class Beer:
         for v in valid:
             if v['id'] == self.id:
                 print('Beer with this ID already exists')
-                return
+                return False
 
         a = Node("Beer", id=self.id, brewery_id=self.brewery_id, style_id=self.style_id, abv=self.abv, ibu=self.ibu)
         tx.create(a)

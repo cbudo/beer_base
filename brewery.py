@@ -62,7 +62,7 @@ class Brewery:
         for v in valid:
             if v['id'] == self.id:
                 print('Brewery with this ID already exists')
-                return
+                return False
 
         a = Node("Brewery", id=self.id, location=self.zip)
         tx.create(a)
