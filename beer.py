@@ -63,9 +63,9 @@ class Beer:
 
     def submitBeer2neo4j(self):
         tx = g.begin()
-        valid = selector.select("Beer", self.id)
+        valid = g.run('MATCH (b:Beer { id: toInt(\'%s\')}) return b' % self.id)
         for v in valid:
-            if v['id'] == self.id:
+            if v[0]['id'] == self.id:
                 print('Beer with this ID already exists')
                 return
 
@@ -73,9 +73,9 @@ class Beer:
         tx.create(a)
         tx.commit()
 
-        insertedCorrectly = selector.select("Beer", self.id)
-        for v in valid:
-            if v['id'] == self.id:
+        insertedCorrectly = g.run('MATCH (b:Beer { id: toInt(\'%s\')}) return b' % self.id)
+        for v in insertedCorrectly:
+            if v[0]['id'] == self.id:
                 return True
             else:
                 return False
