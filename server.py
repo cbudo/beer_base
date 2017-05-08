@@ -55,6 +55,8 @@ def add_beer():
         session.execute(
             "INSERT INTO brewery (brewery_id, brewery_name) VALUES ({}, '".format(brewery_id) + str(
                 beer_info['brewery']) + "')")
+        session.execute(
+            "INSERT INTO brewery_update (id, name) VALUES({},\'{}\')".format(brewery_id, beer_info['brewery']))
     style_id = -1
     category_id = -1
     session.execute(
@@ -73,6 +75,41 @@ def add_beer():
 
 @app.route("/brewery/<int:brewery_id>")
 def brewery(brewery_id):
+    rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
+    brewery_info = rows[0]
+    return render_template("brewery.html", brewery=brewery_info)
+
+
+@app.route("/add_brewery", methods=["GET", "POST"])
+def add_brewery():
+    if request.method == "GET":
+        return render_template("add_brewery.html")
+    brewery_info = request.form
+    try:
+        brewery_id = session.execute(
+            "SELECT * FROM brewery where brewery_name={} LIMIT 1 ALLOW FILTERING".format(brewery_info['name']))[
+            0].brewery_id
+    except:
+        brewery_id = session.execute("SELECT next_id FROM ids where id_name = 'brewery_id' LIMIT 1")[0].next_id
+        result = {'applied': False}
+        while not result['applied']:
+            print('candidate brewery_id: {}'.format(brewery_id))
+            cql_result = session.execute(
+                "UPDATE ids SET next_id = {} WHERE id_name = 'brewery_id' IF next_id = {}".format(
+                    brewery_id + 1, brewery_id))
+            result['applied'] = cql_result[0].applied
+            print(result['applied'])
+    session.execute(
+        "INSERT INTO brewery (brewery_id, brewery_name, address1, address2, city, state, country, code, phone, website, description) VALUES ({}, '{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(
+            brewery_id, brewery_info['name'], brewery_info['address1'], brewery_info['address2'], brewery_info['city'],
+            brewery_info['state'],
+            brewery_info['country'], brewery_info['code'], brewery_info['phone'], brewery_info['website'],
+            brewery_info['description']))
+    session.execute(
+        "INSERT INTO brewery_update (id, name, city, state, zip, country, in_neo4j, in_solr) VALUES({},\'{}\','{}','{}','{}','{}',{},{})".format(
+            brewery_id, brewery_info['name'], brewery_info['city'], brewery_info['state'], brewery_info['code'],
+            brewery_info['country'], False,
+            False))
     rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
     brewery_info = rows[0]
     return render_template("brewery.html", brewery=brewery_info)

@@ -30,6 +30,7 @@ class Updatr:
     def update_databases(self):
         if self.is_running:
             return
+        print('updating databases')
         self.is_running = True
         if solr_is_up():
             self.update_solr()
@@ -57,7 +58,7 @@ class Updatr:
             beer.submitBeer2neo4j()
 
     def scheduler(self):
-        schedule.every(self.schedule_length).seconds.do(self.update_databases())
+        schedule.every(self.schedule_length).seconds.do(self.update_databases)
         while True:
             schedule.run_pending()
             time.sleep(5)
@@ -66,18 +67,24 @@ class Updatr:
         breweries = self.session.execute("select * from brewery_update WHERE in_solr = FALSE ALLOW FILTERING;")
         for row in breweries:
             brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
-            brewery.submitBrewery2neo4j()
+            print(brewery)
+            if brewery.submitBrewery2solr():
+                self.session.execute("UPDATE brewery_update SET in_solr = TRUE WHERE id={};".format(brewery.id))
         beers = self.session.execute("select * from beer_update WHERE in_solr = FALSE ALLOW FILTERING;")
         for row in beers:
             beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
                         row.category_id, row.category)
-            beer.submitBeer2neo4j()
+            print(beer)
+            if beer.submitBeer2solr():
+                self.session.execute("UPDATE beer_update SET in_solr = TRUE WHERE id={};".format(beer.id))
+
+
 
 
 if __name__ == '__main__':
     updatr = Updatr(10)
     t = threading.Thread(target=updatr.scheduler)
-    t.daemon = True
+    # t.daemon = True
     t.start()
-    app.run(host='0.0.0.0', port=5000, debug=True)  # Use this for production
+    # app.run(host='0.0.0.0', port=5000, debug=True)  # Use this for production
     # curr_server.get_app().run()  # This is for local execution
