@@ -1,8 +1,10 @@
-from flask import Flask, render_template, jsonify, request
-import pysolr
-from config import cassandra_cluster
-from cassandra.cluster import Cluster
 import re
+
+import pysolr
+from cassandra.cluster import Cluster
+from flask import Flask, render_template, jsonify, request
+
+from config import cassandra_cluster
 
 app = Flask(__name__)
 cluster = Cluster(cassandra_cluster)
@@ -55,6 +57,11 @@ def add_beer():
                 beer_info['brewery']) + "')")
     style_id = -1
     category_id = -1
+    session.execute(
+        "INSERT INTO beer_update(id, abv, brewery, brewery_id, category, category_id, ibu, in_neo4j, in_solr, name, style, style_id) VALUES({},{},\'{}\',{}, \'{}\', {},{},{},{},\'{}\',\'{}\',{})".format(
+            beer_id, beer_info['abv'], beer_info['brewery'], brewery_id, beer_info['category'], category_id,
+            beer_info['ibu'], False, False,
+            beer_info['name'], beer_info['style'], style_id))
     session.execute(
         "INSERT INTO beer (beer_id, abv, beer_name, brewery_id, category_id, description, ibu, srm, style_id) VALUES ({}, {}, \'{}\', {}, {}, \'{}\', {}, {}, {})".format(
             beer_id, beer_info['abv'], beer_info['name'], brewery_id, category_id, beer_info['description'],

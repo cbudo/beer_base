@@ -1,13 +1,13 @@
-from server import app
-from py2neo import Graph
+import threading
+import time
 import pysolr
 import schedule
-import time
-import config
-import threading
 from cassandra.cluster import Cluster
+from py2neo import Graph
+import config
 from beer import Beer
 from brewery import Brewery
+from server import app
 
 
 def solr_is_up():
@@ -32,7 +32,7 @@ class Updatr:
             return
         self.is_running = True
         if solr_is_up():
-            self.update_solr(NotImplemented)
+            self.update_solr()
         if self.neo4j_is_up():
             self.update_neo4j()
         self.is_running = False
@@ -52,7 +52,8 @@ class Updatr:
             brewery.submitBrewery2neo4j()
         beers = self.session.execute("select * from beer_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
         for row in beers:
-            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.abv, row.ibu, row.category_id)
+            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
+                        row.category_id, row.category)
             beer.submitBeer2neo4j()
 
     def scheduler(self):
@@ -61,11 +62,22 @@ class Updatr:
             schedule.run_pending()
             time.sleep(5)
 
+    def update_solr(self, ):
+        breweries = self.session.execute("select * from brewery_update WHERE in_solr = FALSE ALLOW FILTERING;")
+        for row in breweries:
+            brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
+            brewery.submitBrewery2neo4j()
+        beers = self.session.execute("select * from beer_update WHERE in_solr = FALSE ALLOW FILTERING;")
+        for row in beers:
+            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
+                        row.category_id, row.category)
+            beer.submitBeer2neo4j()
+
 
 if __name__ == '__main__':
     updatr = Updatr(10)
     t = threading.Thread(target=updatr.scheduler)
     t.daemon = True
-    # t.start()
+    t.start()
     app.run(host='0.0.0.0', port=5000, debug=True)  # Use this for production
     # curr_server.get_app().run()  # This is for local execution
