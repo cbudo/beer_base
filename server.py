@@ -56,7 +56,8 @@ def add_beer():
             "INSERT INTO brewery (brewery_id, brewery_name) VALUES ({}, '".format(brewery_id) + str(
                 beer_info['brewery']) + "')")
         session.execute(
-            "INSERT INTO brewery_update (id, name) VALUES({},\'{}\')".format(brewery_id, beer_info['brewery']))
+            "INSERT INTO brewery_update (id, name, in_neo4j, in_solr) VALUES({},\'{}\', FALSE, FALSE)".format(
+                brewery_id, beer_info['brewery']))
     style_id = -1
     category_id = -1
     if not beer_info['srm']:

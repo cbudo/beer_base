@@ -35,6 +35,8 @@ class Updatr:
             self.update_solr()
         if self.neo4j_is_up():
             self.update_neo4j()
+        # else:
+        #     print('Neo4j is not up')
         self.is_running = False
 
     def neo4j_is_up(self):
@@ -46,9 +48,11 @@ class Updatr:
             return False
 
     def update_neo4j(self):
+        print('updating neo4j')
         breweries = self.session.execute("select * from brewery_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
         for row in breweries:
             brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
+            print(brewery.name)
             if brewery.submitBrewery2neo4j():
                 self.session.execute("UPDATE brewery_update SET in_neo4j = TRUE WHERE id={};".format(brewery.id))
 
@@ -56,6 +60,7 @@ class Updatr:
         for row in beers:
             beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
                         row.category_id, row.category)
+            print(beer.name)
             if beer.submitBeer2neo4j():
                 self.session.execute("UPDATE beer_update SET in_neo4j = TRUE WHERE id={};".format(beer.id))
 
