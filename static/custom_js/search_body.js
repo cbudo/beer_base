@@ -56,7 +56,7 @@ function search_by_keywords(){
                 if (entity === 'beer'){
                     $('#beer-table tbody').html(
                         $.map(data.results, function (item, index) {
-                            return '<tr> <td> <a href="/beer/' + item.bid[0] + '">' + cat_name(item.name) +
+                            return '<tr> <td> <a href="/beer/' + item.beer_id[0] + '">' + cat_name(item.name) +
                             '</a> </td> <td>' + cat_name(item.category) + '</td> <td>' + cat_name(item.style) +
                             '</td> <td>' + item.abv[0] + '</td> <td>' + item.ibu[0] + '</td> <td>'
                             + cat_name(item.brewery) + '</td> </tr>';
@@ -65,7 +65,7 @@ function search_by_keywords(){
                 else {
                     $('#brewery-table tbody').html(
                         $.map(data.results, function (item, index) {
-                            return '<tr> <td> <a href="/brewery/' + item.bid[0] + '">' + cat_name(item.name)
+                            return '<tr> <td> <a href="/brewery/' + item.brewery_id[0] + '">' + cat_name(item.name)
                             + '</a> </td> <td>' + cat_name(item.city) + '</td> <td>' + cat_name(item.state) +
                             '</td> <td>' + cat_name(item.country) + '</td> </tr>';
                         }).join());
