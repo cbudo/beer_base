@@ -5,12 +5,17 @@ import schedule
 import time
 import config
 import threading
+from cassandra.cluster import Cluster
+from beer import Beer
+from brewery import Brewery
 
 
 class Updatr:
     def __init__(self, schedule_length):
         self.schedule_length = schedule_length
         self.is_running = False
+        cluster = Cluster(config.cassandra_cluster)
+        self.session = cluster.connect('brewbase')
 
     def update_databases(self):
         if self.is_running:
@@ -67,7 +72,14 @@ class Updatr:
             return False
 
     def update_neo4j(self):
-        return NotImplemented
+        breweries = self.session.execute("select * from brewery_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
+        for row in breweries:
+            brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
+            brewery.submitBrewery2neo4j()
+        beers = self.session.execute("select * from beer_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
+        for row in beers:
+            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.abv, row.ibu, row.category_id)
+            beer.submitBeer2neo4j()
 
     def scheduler(self):
         schedule.every(self.schedule_length).seconds.do(self.update_databases())
