@@ -67,3 +67,10 @@ class Brewery:
         a = Node("Brewery", id=self.id, location=self.zip)
         tx.create(a)
         tx.commit()
+
+        insertedCorrectly = selector.select("Brewery", self.id)
+        for v in valid:
+            if v['id'] == self.id:
+                return True
+            else:
+                return False

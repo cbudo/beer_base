@@ -72,3 +72,10 @@ class Beer:
         a = Node("Beer", id=self.id, brewery_id=self.brewery_id, style_id=self.style_id, abv=self.abv, ibu=self.ibu)
         tx.create(a)
         tx.commit()
+
+        insertedCorrectly = selector.select("Beer", self.id)
+        for v in valid:
+            if v['id'] == self.id:
+                return True
+            else:
+                return False
