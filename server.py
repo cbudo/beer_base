@@ -122,7 +122,7 @@ def search():
 
 @app.route("/perform_search", methods=['POST'])
 def perform_search():
-    solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=10)
+    solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
 
     query = request.form['query']
     if query is None or query == '':

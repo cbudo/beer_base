@@ -15,8 +15,8 @@ class Brewery:
         self.country = country
 
     def submitBrewery2solr(self):
-        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=5)
-        results = solr.search(q='brewery_id:' + self.id, fq=[], rows=1)
+        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
+        results = solr.search(q='brewery_id:' + str(self.id), fq=[], rows=1)
         if len(results.docs) == 1:
             print('Already inserted previously.')
             return False
@@ -35,7 +35,7 @@ class Brewery:
             'country': country_split,
             'keywords': name_split + city_split + state_split + country_split
         }])
-        results = solr.search(q='brewery_id:' + self.id, fq=[], rows=1)
+        results = solr.search(q='brewery_id:' + str(self.id), fq=[], rows=1)
         if len(results.docs) == 1:
             print('Inserted correctly.')
             return True
@@ -43,18 +43,18 @@ class Brewery:
         return False
 
     def deleteBreweryFromsolr(self):
-        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=5)
-        results = solr.search(q='brewery_id:' + self.id, fq=[], rows=1)
+        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
+        results = solr.search(q='brewery_id:' + str(self.id), fq=[], rows=1)
         if len(results.docs) == 0:
             print('Already deleted previously.')
             return False
-        solr.delete(brewery_id=self.id)
-        results = solr.search(q='brewery_id:' + self.id, fq=[], rows=1)
-        if len(results.docs) == 1:
+        solr.delete(q='brewery_id:' + str(self.id))
+        results = solr.search(q='brewery_id:' + str(self.id), fq=[], rows=1)
+        if len(results.docs) >= 1:
             print('Delete failed.')
-            return True
+            return False
         print('Brewery deleted.')
-        return False
+        return True
 
     def submitBrewery2neo4j(self):
         tx = g.begin()

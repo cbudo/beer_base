@@ -24,38 +24,39 @@ class Beer:
         self.category = category
 
     def submitBeer2solr(self):
-        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=5)
-        results = solr.search(q='beer_id:' + self.id, fq=[], rows=1)
-        if len(results.docs) == 1:
+        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
+        results = solr.search(q='beer_id:' + str(self.id), fq=[], rows=1)
+        print(results.docs)
+        if len(results.docs) >= 1:
             print('Already inserted previously.')
             return False
         solr.add([{
-            'beer_id', self.id,
-            'brew_id', self.brewery_id,
-            'style', self.style,
-            'category', self.category,
-            'abv', self.abv,
-            'ibu', self.ibu
+            'beer_id': self.id,
+            'brew_id': self.brewery_id,
+            'style': self.style,
+            'category': self.category,
+            'abv': self.abv,
+            'ibu': self.ibu
         }])
-        results = solr.search(q='beer_id:' + self.id, fq=[], rows=1)
-        if len(results.docs) == 1:
+        results = solr.search(q='beer_id:' + str(self.id), fq=[], rows=1)
+        if len(results.docs) >= 1:
             print('Inserted correctly.')
             return True
         print('Query after insertion failed. Beer not inserted correctly.')
         return False
 
     def deleteBeerFromsolr(self):
-        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=5)
-        results = solr.search(q='beer_id:' + self.id, fq=[], rows=1)
+        solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
+        results = solr.search(q='beer_id:' + str(self.id), fq=[], rows=1)
         if len(results.docs) == 0:
             print('Already deleted previously.')
             return False
-        results = solr.delete(beer_id=self.id)
-        if len(results.docs) == 1:
+        results = solr.delete(q="beer_id:" + str(self.id))
+        if '<int name="status">0</int>' not in results:
             print('Delete failed.')
-            return True
+            return False
         print('Beer deleted.')
-        return False
+        return True
 
     def submitBeer2neo4j(self):
         tx = g.begin()
