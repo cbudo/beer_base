@@ -36,7 +36,8 @@ class Beer:
             'style': self.style,
             'category': self.category,
             'abv': self.abv,
-            'ibu': self.ibu
+            'ibu': self.ibu,
+            'name': self.name
         }])
         results = solr.search(q='beer_id:' + str(self.id), fq=[], rows=1)
         if len(results.docs) >= 1:
