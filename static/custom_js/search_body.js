@@ -11,7 +11,7 @@ function beer_or_brewery(){
         $('#country_sel').hide();
         $('#beer-row').show();
         $('#brewery-row').hide();
-        $('#brewery-table tbody').html("")
+        $('#brewery-table').find('tbody').html("")
     }
     else{
         $('#brewery_sel').hide();
@@ -22,7 +22,7 @@ function beer_or_brewery(){
         $('#country_sel').show();
         $('#beer-row').hide();
         $('#brewery-row').show();
-        $('#beer-table tbody').html("")
+        $('#beer-table').find('tbody').html("")
     }
 }
 
@@ -54,7 +54,7 @@ function search_by_keywords(){
             if (data.status_code === 200) {
                 table_contents = data.results;
                 if (entity === 'beer'){
-                    $('#beer-table tbody').html(
+                    $('#beer-table').find('tbody').html(
                         $.map(data.results, function (item, index) {
                             return '<tr> <td> <a href="/beer/' + item.beer_id[0] + '">' + cat_name(item.name) +
                             '</a> </td> <td>' + cat_name(item.category) + '</td> <td>' + cat_name(item.style) +
@@ -63,7 +63,7 @@ function search_by_keywords(){
                         }).join());
                 }
                 else {
-                    $('#brewery-table tbody').html(
+                    $('#brewery-table').find('tbody').html(
                         $.map(data.results, function (item, index) {
                             return '<tr> <td> <a href="/brewery/' + item.brewery_id[0] + '">' + cat_name(item.name)
                             + '</a> </td> <td>' + cat_name(item.city) + '</td> <td>' + cat_name(item.state) +
