@@ -56,6 +56,10 @@ function change_username_prompt() {
 function check_on_load(){
 
     var logout = retrieve_logout_status();
+    if(logout === null) {
+        logout = "hide";
+        save_logout_status_locally(logout);
+    }
     if(logout === "show"){
         $('#username_input').hide();
         $('#username_label').hide();
