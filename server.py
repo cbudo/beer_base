@@ -97,6 +97,26 @@ def perform_search():
     if len(word_list) == 0:
         return jsonify(results=[], status_code=200)
 
+    op = 'OR'
+
+    cleaned_query, cleaned_words = clean_words(word_list)
+
+    temp_query = get_filter_query(cleaned_words, in_filters)
+
+    if temp_query != '':
+        cleaned_query = temp_query
+
+    if entity == 'beer':
+        filter_queries = ['abv:*']
+    else:
+        filter_queries = ['country:*']
+
+    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
+
+    return jsonify(results=results.docs, status_code=200)
+
+
+def clean_words(word_list):
     cleaned_query = ''
     cleaned_words = []
     for word in word_list:
@@ -107,9 +127,10 @@ def perform_search():
         else:
             cleaned_query += ' ' + word
         cleaned_words.append(word)
+    return cleaned_query, cleaned_words
 
-    op = 'OR'
 
+def get_filter_query(cleaned_words, in_filters):
     temp_query = ''
     for x in range(0, len(in_filters)):
         if re.match(r"^[a-zA-Z0-9_]*$", in_filters[x]) is None:
@@ -122,15 +143,4 @@ def perform_search():
                 to_add += ' AND ' + cleaned_word
         to_add += ') '
         temp_query += to_add
-
-    if temp_query != '':
-        cleaned_query = temp_query
-
-    if entity == 'beer':
-        filter_queries = ['abv:*']
-    else:
-        filter_queries = ['country:*']
-
-    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
-    print(results.docs)
-    return jsonify(results=results.docs, status_code=200)
+    return temp_query

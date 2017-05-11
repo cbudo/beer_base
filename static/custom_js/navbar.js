@@ -1,6 +1,6 @@
 /**
- * Created by steve on 5/9/17.
- */
+* Created by steve on 5/9/17.
+*/
 
 function save_username_locally(username){
 
@@ -16,20 +16,12 @@ function save_logout_status_locally(status) {
 
 function retrieve_username() {
 
-    var retrieved = sessionStorage.getItem('username');
-    if(retrieved) {
-        return retrieved;
-    }
-    else {
-        return null;
-    }
+    return sessionStorage.getItem('username');
 }
 
 function retrieve_logout_status() {
 
-    var result = sessionStorage.getItem('login_status');
-    console.log(result);
-    return result;
+    return sessionStorage.getItem('login_status');
 }
 
 function change_username_prompt() {
@@ -42,6 +34,7 @@ function change_username_prompt() {
         $('#username_label').hide();
         $('#username_text').html(retrieve_username());
         $('#username_text').show();
+        $('#username_button').show();
         save_logout_status_locally("show");
     }
     else {
@@ -49,6 +42,7 @@ function change_username_prompt() {
         $('#username_input').show();
         $('#username_label').show();
         $('#username_text').hide();
+        $('#username_button').show();
         save_logout_status_locally("hide");
     }
 }
@@ -61,15 +55,19 @@ function check_on_load(){
         save_logout_status_locally(logout);
     }
     if(logout === "show"){
+        $('#username_button').html("Logout");
         $('#username_input').hide();
         $('#username_label').hide();
         $('#username_text').html(retrieve_username());
         $('#username_text').show();
+        $('#username_button').show();
     }
     else {
+        $('#username_button').html("Submit");
         $('#username_input').show();
         $('#username_label').show();
         $('#username_text').hide();
+        $('#username_button').show();
     }
 
 }
