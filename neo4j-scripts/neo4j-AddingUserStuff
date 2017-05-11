@@ -1,0 +1,15 @@
+CREATE (n:User { username: 'peruman', name: 'Nithin Perumal', email: 'peruman@rose-hulman.edu'})
+MATCH (u:User),(b:Beer) WHERE u.username = 'peruman' AND b.id = 1 CREATE (u)-[r:LIKES]->(b) RETURN r
+MATCH (u:User),(b:Beer) WHERE u.username = 'peruman' AND b.id = 2 CREATE (u)-[r:LIKES]->(b) RETURN r
+
+CREATE (n:User { username: 'larsonp', name: 'Peter Larson', email: 'larsonp@rose-hulman.edu'})
+MATCH (u:User),(b:Beer) WHERE u.username = 'larsonp' AND b.id = 2 CREATE (u)-[r:LIKES]->(b) RETURN r
+MATCH (u:User),(b:Beer) WHERE u.username = 'larsonp' AND b.id = 3 CREATE (u)-[r:LIKES]->(b) RETURN r
+
+CREATE (n:User { username: 'tiefenaw', name: 'Alec Tiefenthal', email: 'tiefenaw@rose-hulman.edu'})
+MATCH (u:User),(b:Beer) WHERE u.username = 'tiefenaw' AND b.id = 2 CREATE (u)-[r:LIKES]->(b) RETURN r
+MATCH (u:User),(b:Beer) WHERE u.username = 'tiefenaw' AND b.id = 3 CREATE (u)-[r:LIKES]->(b) RETURN r
+
+CREATE (n:User { username: 'trottas', name: 'Steve Trotta', email: 'trottas@rose-hulman.edu'})
+MATCH (u:User),(b:Beer) WHERE u.username = 'trottas' AND b.id = 1 CREATE (u)-[r:LIKES]->(b) RETURN r
+MATCH (u:User),(b:Beer) WHERE u.username = 'trottas' AND b.id = 4 CREATE (u)-[r:LIKES]->(b) RETURN r
