@@ -58,11 +58,8 @@ class Brewery:
 
     def submitBrewery2neo4j(self):
         tx = g.begin()
-        # valid = selector.select("Brewery", self.id)
         valid = g.run('MATCH (br:Brewery { id: toInt(\'%s\')}) return br' % self.id)
         for v in valid:
-            # print (v[0]['id'])
-            # print self.id
             if v[0]['id'] == self.id:
                 print('Brewery with this ID already exists')
                 return
@@ -77,3 +74,13 @@ class Brewery:
                 return True
             else:
                 return False
+
+    def deleteBreweryFromneo4j(self):
+        g.run('MATCH (br:Brewery { id: toInt(\'%s\') }) detach delete br' % self.id)
+        successful = g.run('MATCH (br:Brewery { id: toInt(\'%s\')}) return br' % self.id)
+        for v in successful:
+            if v[0]['id'] == self.id:
+                print('Not deleted successfully')
+                return False
+            else:
+                return True
