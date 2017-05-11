@@ -80,7 +80,7 @@ def search():
 def perform_search():
     solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
 
-    query = request.form['query']
+    query = request.form['query'] #Change to request.form['username'] for the new search by user function
     if query is None or query == '':
         return jsonify(results=[], status_code=200)
     word_list = query.split(' ')
@@ -133,4 +133,4 @@ def perform_search():
 
     results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
     print(results.docs)
-    return jsonify(results=results.docs, status_code=200)
+    return jsonify(results=results.docs, status_code=200) #make sure status code is inclucded.  results=results.docs = results:results.doc.  Send back a list of beers.
