@@ -89,9 +89,3 @@ class Beer:
                 return False
             else:
                 return True
-
-
-if __name__ == '__main__':
-    beer = Beer(-56, 'test_beer', 'test_brewery', 1, 1, 'style', 1, 1, 1, 'category')
-    beer.submitBeer2neo4j()
-    beer.deleteBeerFromneo4j()

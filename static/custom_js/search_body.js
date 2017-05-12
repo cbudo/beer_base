@@ -1,4 +1,4 @@
-var table_contents = []
+var table_contents = [];
 
 function beer_or_brewery(){
     entity = $('#entity-chooser').val();
@@ -29,9 +29,9 @@ function beer_or_brewery(){
 function search_by_keywords(){
     var server_endpoint = '/perform_search';
 
-    query = $('#beerSearchInput').val();
-    filter = $('#filter-chooser').val();
-    entity = $('#entity-chooser').val();
+    var query = $('#beerSearchInput').val();
+    var filter = $('#filter-chooser').val();
+    var entity = $('#entity-chooser').val();
     if(!entity || entity === ''){
         entity = 'beer';
     }
@@ -51,34 +51,62 @@ function search_by_keywords(){
         dataType: "json",
         url: server_endpoint,
         success: function (data) {
-            if (data.status_code === 200) {
-                table_contents = data.results;
-                if (entity === 'beer'){
-                    $('#beer-table').find('tbody').html(
-                        $.map(data.results, function (item, index) {
-                            return '<tr> <td> <a href="/beer/' + item.beer_id[0] + '">' + cat_name(item.name) +
+            table_contents = data.results;
+            if (entity === 'beer') {
+                $('#beer-table').find('tbody').html(
+                    $.map(data.results, function (item, index) {
+                        return '<tr> <td> <a href="/beer/' + item.beer_id[0] + '">' + cat_name(item.name) +
                             '</a> </td> <td>' + cat_name(item.category) + '</td> <td>' + cat_name(item.style) +
                             '</td> <td>' + item.abv[0] + '</td> <td>' + item.ibu[0] + '</td> <td>'
-                            + cat_name(item.brewery) + '</td> </tr>';
-                        }).join());
-                }
-                else {
-                    $('#brewery-table').find('tbody').html(
-                        $.map(data.results, function (item, index) {
-                            return '<tr> <td> <a href="/brewery/' + item.brewery_id[0] + '">' + cat_name(item.name)
-                            + '</a> </td> <td>' + cat_name(item.city) + '</td> <td>' + cat_name(item.state) +
-                            '</td> <td>' + cat_name(item.country) + '</td> </tr>';
-                        }).join());
-                }
+                            + cat_name(item.brewery) + '</td> <td>' + '<button onclick="like_beer(' + item.beer_id[0] + ')">Like</button>' + '</td> </tr>';
+                    }).join());
             }
             else {
-                alert("Unknown Error - Search Not Successful Due To Unforeseen Error.");
+                $('#brewery-table').find('tbody').html(
+                    $.map(data.results, function (item, index) {
+                        return '<tr> <td> <a href="/brewery/' + item.brewery_id[0] + '">' + cat_name(item.name)
+                            + '</a> </td> <td>' + cat_name(item.city) + '</td> <td>' + cat_name(item.state) +
+                            '</td> <td>' + cat_name(item.country) + '</td> </tr>';
+                    }).join());
             }
+        },
+        failure: function (data) {
+            alert("Unknown Error - Search Not Successful Due To Unforeseen Error.");
     }});
 }
 
+function like_beer(beer_id){
+
+    var server_endpoint = '/like_beer';
+
+    var username = retrieve_username();
+
+    $.ajax({headers : {},
+        type: "POST",
+        data: {
+            "username" : username,
+            "beer_id": beer_id
+        },
+        dataType: "json",
+        url: server_endpoint,
+        success: function (data) {
+            if(data.liked === 'no'){
+                alert('Beer Already Liked Before!');
+            }
+            else {
+                alert("Beer Liked!");
+            }
+            return true;
+        },
+        error: function (data) {
+            alert("Query for existing.");
+            return false;
+        }
+    });
+}
+
 function cat_name(array_of_words){
-    full_string = "";
+    var full_string = "";
     array_of_words.forEach(function(word){
         if(full_string === ""){
             full_string += word;

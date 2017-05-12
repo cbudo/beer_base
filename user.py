@@ -37,9 +37,3 @@ class User:
                 return False
             else:
                 return True
-
-
-if __name__ == '__main__':
-    user = User('test_username', 'test name')
-    print user.submit2neo4j()
-    user.deleteFromneo4j()

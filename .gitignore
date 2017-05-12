@@ -5,3 +5,4 @@
 /.vs
 .idea/*
 *.pyc
+beer_base.iml

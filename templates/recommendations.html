@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block body %}    <!-- Custom styles for this template -->
+    <link href="../static/custom_css/search_body.css" rel="stylesheet">
+    <div class="container">
+        <div class="row" id="beer-row">
+            <div class="col-lg-12">
+                <table class="table" id="beer-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Style</th>
+                        <th>ABV (%)</th>
+                        <th>IBU</th>
+                        <th>Brewery Responsible</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ table|safe }}
+                    </tbody>
+                </table>
+                <hr>
+            </div>
+        </div>
+    </div>
+{% endblock %}
