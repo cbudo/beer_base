@@ -6,6 +6,9 @@ from flask import Flask, render_template, jsonify, request
 
 from config import cassandra_cluster
 
+import py2neo
+from py2neo import Graph, Node, Relationship, NodeSelector
+
 app = Flask(__name__)
 cluster = Cluster(cassandra_cluster)
 session = cluster.connect('brewbase')
@@ -129,7 +132,7 @@ def search():
 def perform_search():
     solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
 
-    query = request.form['query']
+    query = request.form['query'] #Change to request.form['username'] for the new search by user function
     if query is None or query == '':
         return jsonify(results=[], status_code=200)
     word_list = query.split(' ')
@@ -146,6 +149,61 @@ def perform_search():
     if len(word_list) == 0:
         return jsonify(results=[], status_code=200)
 
+    op = 'OR'
+
+    cleaned_query, cleaned_words = clean_words(word_list)
+
+    temp_query = get_filter_query(cleaned_words, in_filters)
+
+    if temp_query != '':
+        cleaned_query = temp_query
+
+    if entity == 'beer':
+        filter_queries = ['abv:*']
+    else:
+        filter_queries = ['country:*']
+
+    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
+
+    return jsonify(results=results.docs, status_code=200)
+
+
+@app.route("/perform_user_rec", methods=['POST'])
+def perform_user_rec():
+    g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
+    selector = NodeSelector(g)
+    user = request.form['username']
+
+    if user is None or user == '':
+        return jsonify(results=[], status_code=200)
+
+    user = g.run('MATCH (u:User { username: \'%s\' }) return u.username' % username)
+    validCheck = ''
+    for u in user:
+        validCheck = 'checked'
+    if validCheck == '':
+        print("No users with that name in the database")
+        return
+
+    suggestedBeers = g.run('MATCH (:User {username:\'%s\'})-[:LIKES*3]-(b:Beer) with DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
+    removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % user)
+
+    allBeersSuggested = []
+    for beer in suggestedBeers:
+        allBeersSuggested.append(beer[0])
+
+    beersToRemove = []
+    for like in removeLiked:
+        beersToRemove.append(like[0])
+
+    toBeSuggested =list(set(allBeersSuggested)^set(beersToRemove))
+
+    print(toBeSuggested)
+
+    return toBeSuggested
+
+
+def clean_words(word_list):
     cleaned_query = ''
     cleaned_words = []
     for word in word_list:
@@ -156,9 +214,10 @@ def perform_search():
         else:
             cleaned_query += ' ' + word
         cleaned_words.append(word)
+    return cleaned_query, cleaned_words
 
-    op = 'OR'
 
+def get_filter_query(cleaned_words, in_filters):
     temp_query = ''
     for x in range(0, len(in_filters)):
         if re.match(r"^[a-zA-Z0-9_]*$", in_filters[x]) is None:
@@ -171,15 +230,4 @@ def perform_search():
                 to_add += ' AND ' + cleaned_word
         to_add += ') '
         temp_query += to_add
-
-    if temp_query != '':
-        cleaned_query = temp_query
-
-    if entity == 'beer':
-        filter_queries = ['abv:*']
-    else:
-        filter_queries = ['country:*']
-
-    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
-    print(results.docs)
-    return jsonify(results=results.docs, status_code=200)
+    return temp_query

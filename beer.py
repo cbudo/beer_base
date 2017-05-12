@@ -79,3 +79,13 @@ class Beer:
                 return True
             else:
                 return False
+
+    def deleteBeerFromneo4j(self):
+        g.run('MATCH (b:Beer { id: toInt(\'%s\') }) detach delete b' % self.id)
+        successful = g.run('MATCH (b:Beer { id: toInt(\'%s\')}) return b' % self.id)
+        for v in successful:
+            if v[0]['id'] == self.id:
+                print('Not deleted successfully')
+                return False
+            else:
+                return True
