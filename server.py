@@ -291,6 +291,7 @@ def create_user():
     user = request.form
     try:
         session.execute("INSERT INTO user (username, name) VALUES ('{}','{}')".format(user['username'], None))
+        session.execute("INSERT INTO user_update (username, name, in_neo4j VALUES ('{}', '{}', FALSE )".format(user['username'], None))
         username = session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username
         return make_response(jsonify(result=username), 200)
     except:
