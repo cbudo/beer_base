@@ -3,11 +3,9 @@ import re
 import pysolr
 from cassandra.cluster import Cluster
 from flask import Flask, render_template, jsonify, request, make_response
+from py2neo import Graph, NodeSelector
 
 from config import cassandra_cluster
-
-import py2neo
-from py2neo import Graph, Node, Relationship, NodeSelector
 
 app = Flask(__name__)
 cluster = Cluster(cassandra_cluster)
@@ -81,6 +79,13 @@ def add_beer():
     return render_template("beer.html", beer=beer_info)
 
 
+@app.route("/delete_beer/<int:beer_id>")
+def delete_beer(beer_id):
+    session.execute('DELETE FROM beer WHERE beer_id={}'.format(beer_id))
+    session.execute('INSERT INTO beer_delete(id, deleted_neo4j, deleted_solr) VALUES({}, FALSE, FALSE)'.format(beer_id))
+    return index()
+
+
 @app.route("/brewery/<int:brewery_id>")
 def brewery(brewery_id):
     rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
@@ -123,6 +128,14 @@ def add_brewery():
     return render_template("brewery.html", brewery=brewery_info)
 
 
+@app.route("/delete_brewery/<int:brewery_id>")
+def delete_brewery(brewery_id):
+    session.execute('DELETE FROM brewery WHERE brewery_id={}'.format(brewery_id))
+    session.execute(
+        'INSERT INTO brewery_delete(id, deleted_neo4j, deleted_solr) VALUES({}, FALSE, FALSE)'.format(brewery_id))
+    return index()
+
+
 @app.route("/search")
 def search():
     return render_template("search_body.html")
@@ -132,7 +145,7 @@ def search():
 def perform_search():
     solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
 
-    query = request.form['query'] #Change to request.form['username'] for the new search by user function
+    query = request.form['query']  # Change to request.form['username'] for the new search by user function
     if query is None or query == '':
         return jsonify(results=[], status_code=200)
     word_list = query.split(' ')
@@ -185,7 +198,8 @@ def perform_user_rec():
         print("No users with that name in the database")
         return
 
-    suggestedBeers = g.run('MATCH (:User {username:\'%s\'})-[:LIKES*3]-(b:Beer) with DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
+    suggestedBeers = g.run(
+        'MATCH (:User {username:\'%s\'})-[:LIKES*3]-(b:Beer) with DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
     removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % user)
 
     allBeersSuggested = []
@@ -196,7 +210,7 @@ def perform_user_rec():
     for like in removeLiked:
         beersToRemove.append(like[0])
 
-    toBeSuggested =list(set(allBeersSuggested)^set(beersToRemove))
+    toBeSuggested = list(set(allBeersSuggested) ^ set(beersToRemove))
 
     print(toBeSuggested)
 
@@ -240,7 +254,9 @@ def create_user():
     user = request.form
     try:
         session.execute("INSERT INTO user (username, name) VALUES ('{}','{}')".format(user['username'], None))
-        session.execute("INSERT INTO user_update (username, name, in_neo4j VALUES ('{}', '{}', FALSE )".format(user['username'], None))
+        session.execute(
+            "INSERT INTO user_update (username, name, in_neo4j VALUES ('{}', '{}', FALSE )".format(user['username'],
+                                                                                                   None))
         username = session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username
         return make_response(jsonify(result=username), 200)
     except:
@@ -253,6 +269,8 @@ def login_user():
         return render_template('login.html')
     user = request.form
     try:
-        return make_response(jsonify(result=session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username), 200)
+        return make_response(jsonify(
+            result=session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username),
+                             200)
     except:
         return make_response(jsonify(result=None), 404)

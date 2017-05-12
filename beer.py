@@ -6,7 +6,8 @@ selector = NodeSelector(g)
 
 
 class Beer:
-    def __init__(self, beer_id, name, brewery, brewery_id, style_id, style, abv, ibu, category_id, category):
+    def __init__(self, beer_id, name=None, brewery=None, brewery_id=None, style_id=None, style=None, abv=None, ibu=None,
+                 category_id=None, category=None):
         self.id = beer_id
         self.name = name
         self.brewery = brewery
@@ -91,5 +92,6 @@ class Beer:
 
 
 if __name__ == '__main__':
-    beer = Beer(7000, 'test_beer', 'test_brewery', 1, 1, 'style', 1, 1, 1, 'category')
+    beer = Beer(-56, 'test_beer', 'test_brewery', 1, 1, 'style', 1, 1, 1, 'category')
     beer.submitBeer2neo4j()
+    beer.deleteBeerFromneo4j()

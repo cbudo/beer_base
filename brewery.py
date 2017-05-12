@@ -1,12 +1,12 @@
 import pysolr
-import py2neo
-from py2neo import Graph, Node, Relationship, NodeSelector
+from py2neo import Graph, Node, NodeSelector
 
 g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
 selector = NodeSelector(g)
 
+
 class Brewery:
-    def __init__(self, brewery_id, name, zip_code, city, state, country):
+    def __init__(self, brewery_id, name=None, zip_code=None, city=None, state=None, country=None):
         self.id = brewery_id
         self.name = name
         self.zip = zip_code

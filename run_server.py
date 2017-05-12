@@ -34,8 +34,10 @@ class Updatr:
         self.is_running = True
         if solr_is_up():
             self.update_solr()
+            self.update_solr_deletes()
         if self.neo4j_is_up():
             self.update_neo4j()
+            self.update_neo4j_deletes()
         # else:
         #     print('Neo4j is not up')
         self.is_running = False
@@ -65,10 +67,9 @@ class Updatr:
 
         users = self.session.execute("select * from user_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
         for row in users:
-            user = User(row.name, row.username)
+            user = User(row.username, row.name)
             if user.submit2neo4j():
                 query = "UPDATE user_update SET in_neo4j = TRUE WHERE username='{}';".format(user.username)
-                print query
                 self.session.execute(query)
 
     def scheduler(self):
@@ -89,6 +90,38 @@ class Updatr:
                         row.category_id, row.category)
             if beer.submitBeer2solr():
                 self.session.execute("UPDATE beer_update SET in_solr = TRUE WHERE id={};".format(beer.id))
+
+    def update_neo4j_deletes(self):
+        breweries = self.session.execute("select * from brewery_delete WHERE deleted_neo4j = FALSE ALLOW FILTERING;")
+        for row in breweries:
+            brewery = Brewery(row.id)
+            if brewery.deleteBreweryFromneo4j():
+                self.session.execute("UPDATE brewery_delete SET deleted_neo4j = TRUE WHERE id={};".format(brewery.id))
+
+        beers = self.session.execute("select * from beer_delete WHERE deleted_neo4j = FALSE ALLOW FILTERING;")
+        for row in beers:
+            beer = Beer(row.id)
+            if beer.deleteBeerFromneo4j():
+                self.session.execute("UPDATE beer_delete SET deleted_neo4j = TRUE WHERE id={};".format(beer.id))
+
+        users = self.session.execute("select * from user_delete WHERE deleted = FALSE ALLOW FILTERING;")
+        for row in users:
+            user = User(row.username, row.name)
+            if user.deleteFromneo4j():
+                query = "UPDATE user_delete SET deleted = TRUE WHERE username='{}';".format(user.username)
+                self.session.execute(query)
+
+    def update_solr_deletes(self):
+        breweries = self.session.execute("select * from brewery_delete WHERE deleted_solr = FALSE ALLOW FILTERING;")
+        for row in breweries:
+            brewery = Brewery(row.id)
+            if brewery.deleteBreweryFromsolr():
+                self.session.execute("UPDATE brewery_delete SET deleted_solr = TRUE WHERE id={};".format(brewery.id))
+        beers = self.session.execute("select * from beer_delete WHERE deleted_solr = FALSE ALLOW FILTERING;")
+        for row in beers:
+            beer = Beer(row.id)
+            if beer.deleteBeerFromsolr():
+                self.session.execute("UPDATE beer_delete SET deleted_solr = TRUE WHERE id={};".format(beer.id))
 
 
 if __name__ == '__main__':

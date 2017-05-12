@@ -1,4 +1,3 @@
-import pysolr
 from py2neo import Graph, Node, NodeSelector
 
 g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
@@ -6,7 +5,7 @@ selector = NodeSelector(g)
 
 
 class User:
-    def __init__(self, name, username):
+    def __init__(self, username, name=None):
         self.username = username
         self.name = name
 
@@ -41,5 +40,6 @@ class User:
 
 
 if __name__ == '__main__':
-    user = User('test name', 'test_username')
+    user = User('test_username', 'test name')
     print user.submit2neo4j()
+    user.deleteFromneo4j()
