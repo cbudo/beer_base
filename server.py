@@ -128,44 +128,33 @@ def search():
     return render_template("search_body.html")
 
 
+@app.route("/recommend/<username>")
+def recommend(username):
+    # TODO: Nithin's recommend thing goes here
+    recommended_beers = []
+    full_table_string = ''
+    for beer_neo4j in recommended_beers:
+        beer_solr = search_solr(beer_neo4j.id, 'beer_id', 'beer')[0]
+        full_table_string += '<tr> <td> <a href="/beer/' + beer_solr.beer_id[0] + '">' + cat_name(beer_solr.name) + '</a> </td> <td>' + cat_name(beer_solr.category) + '</td> <td>' + cat_name(beer_solr.style) + '</td> <td>' + beer_solr.abv[0] + '</td> <td>' + beer_solr.ibu[0] + '</td> <td>' + cat_name(beer_solr.brewery[0]) + '<</td> </tr>'
+    return render_template("recommendations.html", table=full_table_string)
+
+
+def cat_name(name_array):
+    full_name = ''
+    for name_word in name_array:
+        full_name += name_word
+    return full_name
+
+
 @app.route("/perform_search", methods=['POST'])
 def perform_search():
-    solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
-
-    query = request.form['query'] #Change to request.form['username'] for the new search by user function
-    if query is None or query == '':
-        return jsonify(results=[], status_code=200)
-    word_list = query.split(' ')
-
+    query = request.form['query']
     filter_string = request.form['filter']
-    in_filters = []
-    if filter_string is not None and filter_string != '':
-        in_filters = filter_string.split(' ')
-
     entity = 'beer'
     if request.form['entity'] is not None and request.form['entity'] != '':
         entity = request.form['entity']
-
-    if len(word_list) == 0:
-        return jsonify(results=[], status_code=200)
-
-    op = 'OR'
-
-    cleaned_query, cleaned_words = clean_words(word_list)
-
-    temp_query = get_filter_query(cleaned_words, in_filters)
-
-    if temp_query != '':
-        cleaned_query = temp_query
-
-    if entity == 'beer':
-        filter_queries = ['abv:*']
-    else:
-        filter_queries = ['country:*']
-
-    results = solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
-
-    return jsonify(results=results.docs, status_code=200)
+    results = search_solr(query, filter_string, entity)
+    return make_response(jsonify(results=results.docs), 200)
 
 
 @app.route("/perform_user_rec", methods=['POST'])
@@ -264,6 +253,37 @@ def get_filter_query(cleaned_words, in_filters):
     return temp_query
 
 
+def search_solr(query, filter_string, entity):
+    solr = pysolr.Solr('http://solr.csse.rose-hulman.edu:8983/solr/beerbase/', timeout=50)
+
+    if query is None or query == '':
+        return make_response(jsonify(results=[]), 200)
+    word_list = query.split(' ')
+
+    in_filters = []
+    if filter_string is not None and filter_string != '':
+        in_filters = filter_string.split(' ')
+
+    if len(word_list) == 0:
+        return make_response(jsonify(results=[]), 200)
+
+    op = 'OR'
+
+    cleaned_query, cleaned_words = clean_words(word_list)
+
+    temp_query = get_filter_query(cleaned_words, in_filters)
+
+    if temp_query != '':
+        cleaned_query = temp_query
+
+    if entity == 'beer':
+        filter_queries = ['abv:*']
+    else:
+        filter_queries = ['country:*']
+
+    return solr.search(q=cleaned_query, fq=filter_queries, rows=100, op=op)
+
+
 @app.route("/create_user", methods=["GET", "POST"])
 def create_user():
     if request.method == 'GET':
@@ -274,7 +294,7 @@ def create_user():
         username = session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username
         return make_response(jsonify(result=username), 200)
     except:
-        return make_response(jsonify(result=None), status_code=404)
+        return make_response(jsonify(result=None), 404)
 
 
 @app.route("/login", methods=["GET", "POST"])

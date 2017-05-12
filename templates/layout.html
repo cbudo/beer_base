@@ -34,10 +34,18 @@
                             <label style="padding-right:5px; display:none" for="username_input" id="username_label">Input Username:</label>
                             <input style="padding-right:5px; display:none" type="text" class="form-control" id="username_input"
                                    placeholder="Enter your username..."/>
-                            <a href="/" style="padding-right:5px; display:none" id="username_text">Name</a>
+                            <a href="/recommend/" style="padding-right:5px; display:none" id="username_text">Name</a>
                             <button style="display:none" type="button" class="btn btn-primary"
-                                    onclick="change_username_prompt();" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="username_button">
-                                Submit
+                                    onclick="registration_call('log_in');" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="username_button">
+                                Log In
+                            </button>
+                            <button style="display:none" type="button" class="btn btn-primary"
+                                    onclick="change_username_prompt('');" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="username_log_out">
+                                Log Out
+                            </button>
+                            <button style="display:none" type="button" class="btn btn-primary"
+                                    onclick="registration_call('sign_up');" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="sign_up_button">
+                                Sign Up
                             </button>
                         </div>
                     </li>
