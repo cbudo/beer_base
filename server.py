@@ -2,7 +2,7 @@ import re
 
 import pysolr
 from cassandra.cluster import Cluster
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, make_response
 
 from config import cassandra_cluster
 
@@ -231,3 +231,27 @@ def get_filter_query(cleaned_words, in_filters):
         to_add += ') '
         temp_query += to_add
     return temp_query
+
+
+@app.route("/create_user", methods=["GET", "POST"])
+def create_user():
+    if request.method == 'GET':
+        return render_template('create_user.html')
+    user = request.form
+    try:
+        session.execute("INSERT INTO user (username, name) VALUES ('{}','{}')".format(user['username'], None))
+        username = session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username
+        return make_response(jsonify(result=username), 200)
+    except:
+        return make_response(jsonify(result=None), status_code=404)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login_user():
+    if request.method == 'GET':
+        return render_template('login.html')
+    user = request.form
+    try:
+        return make_response(jsonify(result=session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username), 200)
+    except:
+        return make_response(jsonify(result=None), 404)
