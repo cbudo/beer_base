@@ -128,14 +128,18 @@ def search():
     return render_template("search_body.html")
 
 
-@app.route("/recommend/<username>")
+@app.route("/recommend/<username>", methods=["GET"])
 def recommend(username):
-    # TODO: Nithin's recommend thing goes here
-    recommended_beers = []
+    recommended_beers = perform_user_rec(username)
+    print(recommended_beers)
     full_table_string = ''
     for beer_neo4j in recommended_beers:
-        beer_solr = search_solr(beer_neo4j.id, 'beer_id', 'beer')[0]
-        full_table_string += '<tr> <td> <a href="/beer/' + beer_solr.beer_id[0] + '">' + cat_name(beer_solr.name) + '</a> </td> <td>' + cat_name(beer_solr.category) + '</td> <td>' + cat_name(beer_solr.style) + '</td> <td>' + beer_solr.abv[0] + '</td> <td>' + beer_solr.ibu[0] + '</td> <td>' + cat_name(beer_solr.brewery[0]) + '<</td> </tr>'
+        beer_res = search_solr(str(beer_neo4j['id']), 'beer_id', 'beer').docs
+        if len(beer_res) <= 0:
+            print("no bueno")
+            continue
+        beer_solr = beer_res[0]
+        full_table_string += '<tr> <td> <a href="/beer/' + str(beer_solr['beer_id'][0]) + '">' + cat_name(beer_solr['name']) + '</a> </td> <td>' + cat_name(beer_solr['category']) + '</td> <td>' + cat_name(beer_solr['style']) + '</td> <td>' + str(beer_solr['abv'][0]) + '</td> <td>' + str(beer_solr['ibu'][0]) + '</td> <td>' + cat_name(beer_solr['brewery'][0]) + '</td> </tr>'
     return render_template("recommendations.html", table=full_table_string)
 
 
@@ -157,14 +161,12 @@ def perform_search():
     return make_response(jsonify(results=results.docs), 200)
 
 
-@app.route("/perform_user_rec", methods=['POST'])
-def perform_user_rec():
+def perform_user_rec(username):
     g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
     selector = NodeSelector(g)
-    username = request.form['username']
 
     if username is None or username == '':
-        return jsonify(results=[], status_code=200)
+        return []
 
     user = g.run('MATCH (u:User { username: \'%s\' }) return u.username' % username)
     validCheck = ''
@@ -172,31 +174,38 @@ def perform_user_rec():
         validCheck = 'checked'
     if validCheck == '':
         print("No users with that name in the database")
-        return
+        return []
 
-    suggestedBeers = g.run('MATCH (:User {username:\'%s\'})-[:LIKES*3]-(b:Beer) with DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
-    removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % username)
+    suggestedBeers = g.run('MATCH (user:User {username:\'%s\'})-[:LIKES*2]->(b:Beer), (user)-[:LIKES]-(b2:Beer) WHERE b.id <> b2.id WITH DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
 
-    allBeersSuggested = []
-    for beer in suggestedBeers:
-        allBeersSuggested.append(beer[0])
+    # removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % username)
 
-    beersToRemove = []
-    for like in removeLiked:
-        beersToRemove.append(like[0])
+    # allBeersSuggested = []
+    # for beer in suggestedBeers:
+    #     # print(beer)
+    #     allBeersSuggested.append(beer[0])
 
-    toBeSuggested =list(set(allBeersSuggested)^set(beersToRemove))
+    # beersToRemove = []
+    # for like in removeLiked:
+    #     # print(like)
+    #     beersToRemove.append(like[0])
+    #
+    # print(allBeersSuggested)
+    # print(beersToRemove)
+    #
+    # toBeSuggested =list(set(allBeersSuggested)^set(beersToRemove))
+    #
+    # print(toBeSuggested)
 
-    print(toBeSuggested)
+    return suggestedBeers
 
-    return toBeSuggested
 
 @app.route("/like_beer", methods=['POST'])
 def perform_like():
     g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
     selector = NodeSelector(g)
     username = request.form['username']
-    beerID = request.form['beerID']
+    beerID = request.form['beer_id']
 
     user = g.run('MATCH (u:User { username: \'%s\' }) return u.username' % username)
     beer = g.run('MATCH (b:Beer { id: %s }) return b.id' % beerID)
@@ -205,23 +214,23 @@ def perform_like():
         validCheck = 'checked'
     if validCheck == '':
         print("No users with that name in the database")
-        return "No users with that name in the database"
+        return make_response(jsonify(), 500)
     validCheck2 = ''
     for b in beer:
         validCheck2 = 'checked'
     if validCheck2 == '':
         print("No beers with that name in the database")
-        return "No beers with that name in the database"
+        return make_response(jsonify(), 500)
 
     checkLike = g.run('MATCH (u:User {username : \'%s\'})-[r:LIKES]->(b:Beer {id : %s}) return r' % (username, beerID))
 
     for thing in checkLike:
         print ('\'%s\' has already liked this beer' % username)
-        return ('\'%s\' has already liked this beer' % username)
-
+        return make_response(jsonify(liked='no'), 200)
 
     ret = g.run('MATCH (u:User),(b:Beer) WHERE u.username = \'%s\' AND b.id = %s CREATE (u)-[r:LIKES]->(b) RETURN r' % (username, beerID))
-    return 'BEER LIKED!'
+    return make_response(jsonify(liked='yes'), 200)
+
 
 def clean_words(word_list):
     cleaned_query = ''

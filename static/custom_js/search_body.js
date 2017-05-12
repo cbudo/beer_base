@@ -90,7 +90,12 @@ function like_beer(beer_id){
         dataType: "json",
         url: server_endpoint,
         success: function (data) {
-            alert("Beer Liked!");
+            if(data.liked === 'no'){
+                alert('Beer Already Liked Before!');
+            }
+            else {
+                alert("Beer Liked!");
+            }
             return true;
         },
         error: function (data) {
