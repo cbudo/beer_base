@@ -8,6 +8,7 @@ import config
 from beer import Beer
 from brewery import Brewery
 from server import app
+from user import User
 
 
 def solr_is_up():
@@ -61,6 +62,14 @@ class Updatr:
                         row.category_id, row.category)
             if beer.submitBeer2neo4j():
                 self.session.execute("UPDATE beer_update SET in_neo4j = TRUE WHERE id={};".format(beer.id))
+
+        users = self.session.execute("select * from user_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
+        for row in users:
+            user = User(row.name, row.username)
+            if user.submit2neo4j():
+                query = "UPDATE user_update SET in_neo4j = TRUE WHERE username='{}';".format(user.username)
+                print query
+                self.session.execute(query)
 
     def scheduler(self):
         schedule.every(self.schedule_length).seconds.do(self.update_databases)
