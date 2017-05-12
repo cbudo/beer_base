@@ -172,9 +172,9 @@ def perform_search():
 def perform_user_rec():
     g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
     selector = NodeSelector(g)
-    user = request.form['username']
+    username = request.form['username']
 
-    if user is None or user == '':
+    if username is None or username == '':
         return jsonify(results=[], status_code=200)
 
     user = g.run('MATCH (u:User { username: \'%s\' }) return u.username' % username)
@@ -186,7 +186,7 @@ def perform_user_rec():
         return
 
     suggestedBeers = g.run('MATCH (:User {username:\'%s\'})-[:LIKES*3]-(b:Beer) with DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
-    removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % user)
+    removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % username)
 
     allBeersSuggested = []
     for beer in suggestedBeers:
@@ -202,6 +202,37 @@ def perform_user_rec():
 
     return toBeSuggested
 
+@app.route("/like_beer", methods=['POST'])
+def perform_like():
+    g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
+    selector = NodeSelector(g)
+    username = request.form['username']
+    beerID = request.form['beerID']
+
+    user = g.run('MATCH (u:User { username: \'%s\' }) return u.username' % username)
+    beer = g.run('MATCH (b:Beer { id: %s }) return b.id' % beerID)
+    validCheck = ''
+    for u in user:
+        validCheck = 'checked'
+    if validCheck == '':
+        print("No users with that name in the database")
+        return "No users with that name in the database"
+    validCheck2 = ''
+    for b in beer:
+        validCheck2 = 'checked'
+    if validCheck2 == '':
+        print("No beers with that name in the database")
+        return "No beers with that name in the database"
+
+    checkLike = g.run('MATCH (u:User {username : \'%s\'})-[r:LIKES]->(b:Beer {id : %s}) return r' % (username, beerID))
+
+    for thing in checkLike:
+        print ('\'%s\' has already liked this beer' % username)
+        return ('\'%s\' has already liked this beer' % username)
+
+
+    ret = g.run('MATCH (u:User),(b:Beer) WHERE u.username = \'%s\' AND b.id = %s CREATE (u)-[r:LIKES]->(b) RETURN r' % (username, beerID))
+    return 'BEER LIKED!'
 
 def clean_words(word_list):
     cleaned_query = ''
