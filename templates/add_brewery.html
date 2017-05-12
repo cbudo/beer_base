@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block body %}
+<form class='form-control' method="post" action="/add_brewery">
+    <div class="form_description">
+        <h2>Add Brewery</h2>
+        <p>Insert the brewery info here!</p>
+    </div>
+    <ul>
+
+        <li id="li_1">
+            <label class="description" for="element_1">Name </label>
+            <div>
+                <input id="element_1" name="name" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_8">
+            <label class="description" for="element_8">Address 1 </label>
+            <div>
+                <input id="element_8" name="address1" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_2">
+            <label class="description" for="element_2">Address 2 </label>
+            <div>
+                <input id="element_2" name="address2" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_3">
+            <label class="description" for="element_3">City </label>
+            <div>
+                <input id="element_3" name="city" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_4">
+            <label class="description" for="element_4">State </label>
+            <div>
+                <input id="element_4" name="state" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_5">
+            <label class="description" for="element_5">Zip Code </label>
+            <div>
+                <input id="element_5" name="code" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_6">
+            <label class="description" for="element_6">Country </label>
+            <div>
+                <input id="element_6" name="country" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_8">
+            <label class="description" for="element_8">Website </label>
+            <div>
+                <input id="element_8" name="website" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+
+        <li id="li_9">
+            <label class="description" for="element_9">Phone </label>
+            <div>
+                <input id="element_9" name="phone" class="element text medium" type="text" maxlength="255" value="">
+            </div>
+        </li>
+        <li id="li_7">
+            <label class="description" for="element_7">Description </label>
+            <div>
+                <textarea id="element_7" name="description" class="element textarea medium"></textarea>
+            </div>
+        </li>
+
+        <li class="buttons">
+            <input type="hidden" name="form_id" value="29925">
+
+            <input id="saveForm" class="button_text" type="submit" name="submit" value="Submit">
+        </li>
+    </ul>
+</form>
+
+{% endblock %}

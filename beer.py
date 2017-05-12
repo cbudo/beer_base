@@ -1,6 +1,5 @@
 import pysolr
-import py2neo
-from py2neo import Graph, Node, Relationship, NodeSelector
+from py2neo import Graph, Node, NodeSelector
 
 g = Graph('http://neo4j.csse.rose-hulman.edu:7474/db/data', user='neo4j', password='TrottaSucks')
 selector = NodeSelector(g)
@@ -89,3 +88,8 @@ class Beer:
                 return False
             else:
                 return True
+
+
+if __name__ == '__main__':
+    beer = Beer(7000, 'test_beer', 'test_brewery', 1, 1, 'style', 1, 1, 1, 'category')
+    beer.submitBeer2neo4j()

@@ -1,13 +1,13 @@
-from server import app
-from py2neo import Graph
+import threading
+import time
 import pysolr
 import schedule
-import time
-import config
-import threading
 from cassandra.cluster import Cluster
+from py2neo import Graph, NodeSelector
+import config
 from beer import Beer
 from brewery import Brewery
+from server import app
 
 
 def solr_is_up():
@@ -32,16 +32,19 @@ class Updatr:
             return
         self.is_running = True
         if solr_is_up():
-            self.update_solr(NotImplemented)
+            self.update_solr()
         if self.neo4j_is_up():
             self.update_neo4j()
+        # else:
+        #     print('Neo4j is not up')
         self.is_running = False
 
     def neo4j_is_up(self):
         g = Graph(config.neo4j_route, user=config.neo4j_user, password=config.neo4j_password)
-        selector = g.run('MATCH (n:Beer) WHERE n.id = -1 RETURN n')
+        selector = NodeSelector(g)
+        selector = selector.select("Beer", id=-1).first()  # "'MATCH (n:Beer) WHERE n.id = -1 RETURN n')
         try:
-            return selector.id is not None
+            return selector['id'] is not None
         except:
             return False
 
@@ -49,23 +52,40 @@ class Updatr:
         breweries = self.session.execute("select * from brewery_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
         for row in breweries:
             brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
-            brewery.submitBrewery2neo4j()
+            if brewery.submitBrewery2neo4j():
+                self.session.execute("UPDATE brewery_update SET in_neo4j = TRUE WHERE id={};".format(brewery.id))
+
         beers = self.session.execute("select * from beer_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
         for row in beers:
-            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.abv, row.ibu, row.category_id)
-            beer.submitBeer2neo4j()
+            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
+                        row.category_id, row.category)
+            if beer.submitBeer2neo4j():
+                self.session.execute("UPDATE beer_update SET in_neo4j = TRUE WHERE id={};".format(beer.id))
 
     def scheduler(self):
-        schedule.every(self.schedule_length).seconds.do(self.update_databases())
+        schedule.every(self.schedule_length).seconds.do(self.update_databases)
         while True:
             schedule.run_pending()
             time.sleep(5)
+
+    def update_solr(self, ):
+        breweries = self.session.execute("select * from brewery_update WHERE in_solr = FALSE ALLOW FILTERING;")
+        for row in breweries:
+            brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
+            if brewery.submitBrewery2solr():
+                self.session.execute("UPDATE brewery_update SET in_solr = TRUE WHERE id={};".format(brewery.id))
+        beers = self.session.execute("select * from beer_update WHERE in_solr = FALSE ALLOW FILTERING;")
+        for row in beers:
+            beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
+                        row.category_id, row.category)
+            if beer.submitBeer2solr():
+                self.session.execute("UPDATE beer_update SET in_solr = TRUE WHERE id={};".format(beer.id))
 
 
 if __name__ == '__main__':
     updatr = Updatr(10)
     t = threading.Thread(target=updatr.scheduler)
     t.daemon = True
-    # t.start()
+    t.start()
     app.run(host='0.0.0.0', port=5000, debug=True)  # Use this for production
     # curr_server.get_app().run()  # This is for local execution

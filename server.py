@@ -1,8 +1,10 @@
-from flask import Flask, render_template, jsonify, request
-import pysolr
-from config import cassandra_cluster
-from cassandra.cluster import Cluster
 import re
+
+import pysolr
+from cassandra.cluster import Cluster
+from flask import Flask, render_template, jsonify, request, make_response
+
+from config import cassandra_cluster
 
 import py2neo
 from py2neo import Graph, Node, Relationship, NodeSelector
@@ -56,12 +58,24 @@ def add_beer():
         session.execute(
             "INSERT INTO brewery (brewery_id, brewery_name) VALUES ({}, '".format(brewery_id) + str(
                 beer_info['brewery']) + "')")
+        session.execute(
+            "INSERT INTO brewery_update (id, name, city, state, country, in_neo4j, in_solr) VALUES({},\'{}\','null','null','null', FALSE, FALSE)".format(
+                brewery_id, beer_info['brewery']))
     style_id = -1
     category_id = -1
+    if not beer_info['srm']:
+        srm = -1
+    else:
+        srm = beer_info['srm']
+    session.execute(
+        "INSERT INTO beer_update(id, abv, brewery, brewery_id, category, category_id, ibu, in_neo4j, in_solr, name, style, style_id) VALUES({},{},\'{}\',{}, \'{}\', {},{},{},{},\'{}\',\'{}\',{})".format(
+            beer_id, beer_info['abv'], beer_info['brewery'], brewery_id, beer_info['category'], category_id,
+            beer_info['ibu'], False, False,
+            beer_info['name'], beer_info['style'], style_id))
     session.execute(
         "INSERT INTO beer (beer_id, abv, beer_name, brewery_id, category_id, description, ibu, srm, style_id) VALUES ({}, {}, \'{}\', {}, {}, \'{}\', {}, {}, {})".format(
             beer_id, beer_info['abv'], beer_info['name'], brewery_id, category_id, beer_info['description'],
-            beer_info['ibu'], beer_info['srm'], style_id))
+            beer_info['ibu'], srm, style_id))
     rows = session.execute('SELECT * FROM beer WHERE beer_id = {} LIMIT 1'.format(beer_id))
     beer_info = rows[0]
     return render_template("beer.html", beer=beer_info)
@@ -69,6 +83,41 @@ def add_beer():
 
 @app.route("/brewery/<int:brewery_id>")
 def brewery(brewery_id):
+    rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
+    brewery_info = rows[0]
+    return render_template("brewery.html", brewery=brewery_info)
+
+
+@app.route("/add_brewery", methods=["GET", "POST"])
+def add_brewery():
+    if request.method == "GET":
+        return render_template("add_brewery.html")
+    brewery_info = request.form
+    try:
+        brewery_id = session.execute(
+            "SELECT * FROM brewery where brewery_name={} LIMIT 1 ALLOW FILTERING".format(brewery_info['name']))[
+            0].brewery_id
+    except:
+        brewery_id = session.execute("SELECT next_id FROM ids where id_name = 'brewery_id' LIMIT 1")[0].next_id
+        result = {'applied': False}
+        while not result['applied']:
+            print('candidate brewery_id: {}'.format(brewery_id))
+            cql_result = session.execute(
+                "UPDATE ids SET next_id = {} WHERE id_name = 'brewery_id' IF next_id = {}".format(
+                    brewery_id + 1, brewery_id))
+            result['applied'] = cql_result[0].applied
+            print(result['applied'])
+    session.execute(
+        "INSERT INTO brewery (brewery_id, brewery_name, address1, address2, city, state, country, code, phone, website, description) VALUES ({}, '{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(
+            brewery_id, brewery_info['name'], brewery_info['address1'], brewery_info['address2'], brewery_info['city'],
+            brewery_info['state'],
+            brewery_info['country'], brewery_info['code'], brewery_info['phone'], brewery_info['website'],
+            brewery_info['description']))
+    session.execute(
+        "INSERT INTO brewery_update (id, name, city, state, zip, country, in_neo4j, in_solr) VALUES({},\'{}\','{}','{}','{}','{}',{},{})".format(
+            brewery_id, brewery_info['name'], brewery_info['city'], brewery_info['state'], brewery_info['code'],
+            brewery_info['country'], False,
+            False))
     rows = session.execute('SELECT * FROM brewery WHERE brewery_id = {} LIMIT 1'.format(brewery_id))
     brewery_info = rows[0]
     return render_template("brewery.html", brewery=brewery_info)
@@ -182,3 +231,27 @@ def get_filter_query(cleaned_words, in_filters):
         to_add += ') '
         temp_query += to_add
     return temp_query
+
+
+@app.route("/create_user", methods=["GET", "POST"])
+def create_user():
+    if request.method == 'GET':
+        return render_template('create_user.html')
+    user = request.form
+    try:
+        session.execute("INSERT INTO user (username, name) VALUES ('{}','{}')".format(user['username'], None))
+        username = session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username
+        return make_response(jsonify(result=username), 200)
+    except:
+        return make_response(jsonify(result=None), status_code=404)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login_user():
+    if request.method == 'GET':
+        return render_template('login.html')
+    user = request.form
+    try:
+        return make_response(jsonify(result=session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username), 200)
+    except:
+        return make_response(jsonify(result=None), 404)

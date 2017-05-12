@@ -20,13 +20,22 @@ class Brewery:
         if len(results.docs) == 1:
             print('Already inserted previously.')
             return False
-        if (self.name is None) or (self.city is None) or (self.state is None) or (self.country is None):
+        if (self.name is None):
             print('Critical attributes are missing.')
             return False
         name_split = self.name.split(' ')
-        city_split = self.city.split(' ')
-        state_split = self.state.split(' ')
-        country_split = self.country.split(' ')
+        if self.city:
+            city_split = self.city.split(' ')
+        else:
+            city_split = []
+        if self.state:
+            state_split = self.state.split(' ')
+        else:
+            state_split = []
+        if self.country:
+            country_split = self.country.split(' ')
+        else:
+            country_split = []
         solr.add([{
             'brewery_id': self.id,
             'name': name_split,
