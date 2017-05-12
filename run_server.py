@@ -68,7 +68,7 @@ class Updatr:
             user = User(row.name, row.username)
             if user.submit2neo4j():
                 query = "UPDATE user_update SET in_neo4j = TRUE WHERE username='{}';".format(user.username)
-                print query
+                print(query)
                 self.session.execute(query)
 
     def scheduler(self):

@@ -135,10 +135,12 @@ def recommend(username):
     full_table_string = ''
     for beer_neo4j in recommended_beers:
         beer_res = search_solr(str(beer_neo4j['id']), 'beer_id', 'beer').docs
+        print(beer_res)
         if len(beer_res) <= 0:
             print("no bueno")
             continue
         beer_solr = beer_res[0]
+        print(beer_solr)
         full_table_string += '<tr> <td> <a href="/beer/' + str(beer_solr['beer_id'][0]) + '">' + cat_name(beer_solr['name']) + '</a> </td> <td>' + cat_name(beer_solr['category']) + '</td> <td>' + cat_name(beer_solr['style']) + '</td> <td>' + str(beer_solr['abv'][0]) + '</td> <td>' + str(beer_solr['ibu'][0]) + '</td> <td>' + cat_name(beer_solr['brewery'][0]) + '</td> </tr>'
     return render_template("recommendations.html", table=full_table_string)
 
@@ -176,28 +178,14 @@ def perform_user_rec(username):
         print("No users with that name in the database")
         return []
 
-    suggestedBeers = g.run('MATCH (user:User {username:\'%s\'})-[:LIKES*2]->(b:Beer), (user)-[:LIKES]-(b2:Beer) WHERE b.id <> b2.id WITH DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
+    suggestedBeers = g.run('MATCH (user:User {username:\'%s\'})-[:LIKES*3]-(b:Beer) WITH DISTINCT b ORDER BY b.id LIMIT 30 RETURN b' % username)
 
-    # removeLiked = g.run('MATCH (:User {username:\'%s\'})-[:LIKES]-(b:Beer) return b' % username)
+    allBeersSuggested = []
+    for beer in suggestedBeers:
+        print(beer)
+        allBeersSuggested.append(beer[0])
 
-    # allBeersSuggested = []
-    # for beer in suggestedBeers:
-    #     # print(beer)
-    #     allBeersSuggested.append(beer[0])
-
-    # beersToRemove = []
-    # for like in removeLiked:
-    #     # print(like)
-    #     beersToRemove.append(like[0])
-    #
-    # print(allBeersSuggested)
-    # print(beersToRemove)
-    #
-    # toBeSuggested =list(set(allBeersSuggested)^set(beersToRemove))
-    #
-    # print(toBeSuggested)
-
-    return suggestedBeers
+    return allBeersSuggested
 
 
 @app.route("/like_beer", methods=['POST'])
@@ -300,10 +288,11 @@ def create_user():
     user = request.form
     try:
         session.execute("INSERT INTO user (username, name) VALUES ('{}','{}')".format(user['username'], None))
-        session.execute("INSERT INTO user_update (username, name, in_neo4j VALUES ('{}', '{}', FALSE )".format(user['username'], None))
+        session.execute("INSERT INTO user_update (username, name, in_neo4j) VALUES ('{}', '{}', FALSE )".format(user['username'], None))
         username = session.execute("SELECT * FROM user WHERE username = '{}'".format(user['username']))[0].username
         return make_response(jsonify(result=username), 200)
-    except:
+    except Exception as e:
+        print(e)
         return make_response(jsonify(result=None), 404)
 
 

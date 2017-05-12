@@ -40,6 +40,6 @@ class User:
                 return True
 
 
-if __name__ == '__main__':
-    user = User('test name', 'test_username')
-    print user.submit2neo4j()
+# if __name__ == '__main__':
+#     user = User('test name', 'test_username')
+#     print(user.submit2neo4j())

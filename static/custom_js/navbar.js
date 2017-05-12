@@ -27,7 +27,7 @@ function retrieve_logout_status() {
 function registration_call(method){
 
     var server_endpoint = '/create_user';
-    if (method === 'log_in'){
+    if (method){
         server_endpoint = '/login';
     }
 

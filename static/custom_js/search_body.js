@@ -99,7 +99,7 @@ function like_beer(beer_id){
             return true;
         },
         error: function (data) {
-            alert("Query for existing user failed - could not log in.");
+            alert("Query for existing.");
             return false;
         }
     });
