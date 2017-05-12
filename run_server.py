@@ -3,7 +3,7 @@ import time
 import pysolr
 import schedule
 from cassandra.cluster import Cluster
-from py2neo import Graph
+from py2neo import Graph, NodeSelector
 import config
 from beer import Beer
 from brewery import Brewery
@@ -41,18 +41,17 @@ class Updatr:
 
     def neo4j_is_up(self):
         g = Graph(config.neo4j_route, user=config.neo4j_user, password=config.neo4j_password)
-        selector = g.run('MATCH (n:Beer) WHERE n.id = -1 RETURN n')
+        selector = NodeSelector(g)
+        selector = selector.select("Beer", id=-1).first()  # "'MATCH (n:Beer) WHERE n.id = -1 RETURN n')
         try:
-            return selector.id is not None
+            return selector['id'] is not None
         except:
             return False
 
     def update_neo4j(self):
-        print('updating neo4j')
         breweries = self.session.execute("select * from brewery_update WHERE in_neo4j = FALSE ALLOW FILTERING;")
         for row in breweries:
             brewery = Brewery(row.id, row.name, row.zip, row.city, row.state, row.country)
-            print(brewery.name)
             if brewery.submitBrewery2neo4j():
                 self.session.execute("UPDATE brewery_update SET in_neo4j = TRUE WHERE id={};".format(brewery.id))
 
@@ -60,7 +59,6 @@ class Updatr:
         for row in beers:
             beer = Beer(row.id, row.name, row.brewery, row.brewery_id, row.style_id, row.style, row.abv, row.ibu,
                         row.category_id, row.category)
-            print(beer.name)
             if beer.submitBeer2neo4j():
                 self.session.execute("UPDATE beer_update SET in_neo4j = TRUE WHERE id={};".format(beer.id))
 
