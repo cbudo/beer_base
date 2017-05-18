@@ -43,10 +43,10 @@ class Updatr:
         self.is_running = False
 
     def neo4j_is_up(self):
-        g = Graph(config.neo4j_route, user=config.neo4j_user, password=config.neo4j_password)
-        selector = NodeSelector(g)
-        selector = selector.select("Beer", id=-1).first()  # "'MATCH (n:Beer) WHERE n.id = -1 RETURN n')
         try:
+            g = Graph(config.neo4j_route, user=config.neo4j_user, password=config.neo4j_password)
+            selector = NodeSelector(g)
+            selector = selector.select("Beer", id=-1).first()  # "'MATCH (n:Beer) WHERE n.id = -1 RETURN n')
             return selector['id'] is not None
         except:
             return False
